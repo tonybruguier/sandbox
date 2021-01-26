@@ -24,9 +24,9 @@ try:
     # final_state_vector = dense_final.final_state_vector
 
     # MPS simulation
-    mps_simulator = ccq.mps_simulator.MPSSimulator()
+    mps_simulator = ccq.mps_simulator.MPSSimulator(rsum2_cutoff=0.5)
     mps_final = mps_simulator.simulate(circuit, qubit_order=qubit_order, initial_state=initial_state)
-    final_state_vector = mps_finalactual.final_state.to_numpy()
+    final_state_vector = mps_final.final_state.to_numpy()
 except MemoryError as error:
     print('TONYBOOM caught memory error: %s' % (error))
     traceback.print_exc()
