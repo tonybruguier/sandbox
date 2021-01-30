@@ -24,7 +24,7 @@ try:
     # final_state_vector = dense_final.final_state_vector
 
     # MPS simulation
-    mps_simulator = ccq.mps_simulator.MPSSimulator(rsum2_cutoff=0.5)
+    mps_simulator = ccq.mps_simulator.MPSSimulator(rsum2_cutoff=1e-9)
     mps_final = mps_simulator.simulate(circuit, qubit_order=qubit_order, initial_state=initial_state)
     final_state_vector = mps_final.final_state.to_numpy()
 except MemoryError as error:
