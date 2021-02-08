@@ -34,8 +34,8 @@ def assign_grouping(qubit_order):
         point[1] -= min_col
 
     for point in grouping.values():
-        point[0] //= 2
-        point[1] //= 2
+        point[0] //= 1
+        point[1] //= 1
 
     max_row = max([point[0] for point in grouping.values()])
     for qubit in grouping.keys():
