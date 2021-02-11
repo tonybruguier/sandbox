@@ -46,8 +46,8 @@ def assign_grouping(qubit_order):
 
 try:
     # Load the circuit
-    # from n12_m14 import circuit_n12_m14_s0_e0_pEFGH as example
-    from n36_m14 import circuit_n36_m14_s0_e0_pEFGH as example
+    from n12_m14 import circuit_n12_m14_s0_e0_pEFGH as example
+    # from n36_m14 import circuit_n36_m14_s0_e0_pEFGH as example
     # from n53_m20 import circuit_n53_m20_s0_e0_pABCDCDAB as example
     circuit = example.CIRCUIT
     qubit_order = example.QUBIT_ORDER
