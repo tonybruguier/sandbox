@@ -37,7 +37,7 @@ def assign_grouping(qubit_order):
         point[0] //= 1
         point[1] //= 1
 
-    max_row = max([point[0] for point in grouping.values()])
+    max_row = max([point[0] for point in grouping.values()]) + 1
     for qubit in grouping.keys():
         grouping[qubit] = grouping[qubit][0] + grouping[qubit][1] * max_row
         # grouping[qubit] = grouping[qubit][1]
@@ -57,8 +57,9 @@ try:
     grouping = assign_grouping(qubit_order)
     pretty_print_grouping(qubit_order, grouping)
 
-     # MPS simulation
-    mps_simulator = ccq.mps_simulator.MPSSimulator(rsum2_cutoff=1e-3, grouping=grouping)
+    # MPS simulation
+    simulation_options = ccq.mps_simulator.MPSOptions(cutoff=1e-3, max_bond=30)
+    mps_simulator = ccq.mps_simulator.MPSSimulator(simulation_options=simulation_options, grouping=grouping)
     mps_final = mps_simulator.simulate(circuit, qubit_order=qubit_order, initial_state=initial_state)
 
     print('%s' % (mps_final.final_state.estimation_stats()))
