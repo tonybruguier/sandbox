@@ -24,8 +24,8 @@ def pretty_print_grouping(qubit_order, grouping):
 
 def assign_grouping(qubit_order):
 
-    grouping = {qubit: [qubit.row, qubit.col] for qubit in qubit_order}
-    # grouping = {qubit: [qubit.col - qubit.row, qubit.col + qubit.row] for qubit in qubit_order}
+    # grouping = {qubit: [qubit.row, qubit.col] for qubit in qubit_order}
+    grouping = {qubit: [qubit.col - qubit.row, qubit.col + qubit.row] for qubit in qubit_order}
 
     min_row = min([point[0] for point in grouping.values()])
     min_col = min([point[1] for point in grouping.values()])
@@ -39,8 +39,16 @@ def assign_grouping(qubit_order):
 
     max_row = max([point[0] for point in grouping.values()]) + 1
     for qubit in grouping.keys():
-        grouping[qubit] = grouping[qubit][0] + grouping[qubit][1] * max_row
-        # grouping[qubit] = grouping[qubit][1]
+        # grouping[qubit] = grouping[qubit][0] + grouping[qubit][1] * max_row
+        # grouping[qubit] = grouping[qubit][0]
+        if grouping[qubit][0] < 4:
+            grouping[qubit] = 0
+        elif grouping[qubit][0] < 4 + 2:
+            grouping[qubit] = 1
+        elif grouping[qubit][0] < 4 + 2 + 2:
+            grouping[qubit] = 2
+        else:
+            grouping[qubit] = 3
 
     return grouping
 
@@ -51,6 +59,7 @@ try:
     # from n53_m20 import circuit_n53_m20_s0_e0_pABCDCDAB as example
     circuit = example.CIRCUIT
     qubit_order = example.QUBIT_ORDER
+
     initial_state = 0
 
     # Grouping
@@ -58,7 +67,7 @@ try:
     pretty_print_grouping(qubit_order, grouping)
 
     # MPS simulation
-    simulation_options = ccq.mps_simulator.MPSOptions(cutoff=1e-3, max_bond=30)
+    simulation_options = ccq.mps_simulator.MPSOptions(cutoff=1e-3, max_bond=1)
     mps_simulator = ccq.mps_simulator.MPSSimulator(simulation_options=simulation_options, grouping=grouping)
     mps_final = mps_simulator.simulate(circuit, qubit_order=qubit_order, initial_state=initial_state)
 
