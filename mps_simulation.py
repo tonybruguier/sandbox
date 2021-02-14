@@ -54,9 +54,9 @@ def assign_grouping(qubit_order):
 
 try:
     # Load the circuit
-    from n12_m14 import circuit_n12_m14_s0_e0_pEFGH as example
+    # from n12_m14 import circuit_n12_m14_s0_e0_pEFGH as example
     # from n36_m14 import circuit_n36_m14_s0_e0_pEFGH as example
-    # from n53_m20 import circuit_n53_m20_s0_e0_pABCDCDAB as example
+    from n53_m20 import circuit_n53_m20_s0_e0_pABCDCDAB as example
     circuit = example.CIRCUIT
     qubit_order = example.QUBIT_ORDER
 
@@ -67,7 +67,7 @@ try:
     pretty_print_grouping(qubit_order, grouping)
 
     # MPS simulation
-    simulation_options = ccq.mps_simulator.MPSOptions(cutoff=1e-3, max_bond=1)
+    simulation_options = ccq.mps_simulator.MPSOptions(cutoff=1e-6, max_bond=100)
     mps_simulator = ccq.mps_simulator.MPSSimulator(simulation_options=simulation_options, grouping=grouping)
     mps_final = mps_simulator.simulate(circuit, qubit_order=qubit_order, initial_state=initial_state)
 
