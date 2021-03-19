@@ -25,6 +25,8 @@ python3 -m pip install quimb
 python3 -m pip install opt_einsum
 python3 -m pip install autoray
 
+python3 -m pip install flynt
+
 # -------- Create new client --------
 git_new_branch() {
     NAME_OF_MY_CLIENT=$1
