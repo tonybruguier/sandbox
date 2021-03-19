@@ -118,69 +118,108 @@ class StabilitizerCode(object):
         self.M = _BuildByCode(M)
         self.X = _BuildByCode(X)
         self.Z = _BuildByCode(Z)
+        self.syndromes_to_corrections = {}
+
+        for qid in range(self.n):
+            for op in ['X', 'Z']:
+                syndrome = [1 if self.M[r][qid] == 'I' or self.M[r][qid] == op else -1 for r in range(self.r)]
+                self.syndromes_to_corrections[tuple(syndrome)] = (op, qid)
 
     def encode(self, circuit, qubits):
-        gate_dict = {'X': cirq.X, 'Y': cirq.Y, 'Z': cirq.Z}
-
         # Equation 4.8:
-        for i, x in enumerate(self.X):
+        for r, x in enumerate(self.X):
             for j in range(self.r, self.n-self.k):
                 if x[j] == 'X' or x[j] == 'Y':
-                    circuit.append(cirq.ControlledOperation(
-                        [qubits[self.n - self.k + i]], cirq.X(qubits[j])))
+                    circuit.append(cirq.ControlledOperation([qubits[self.n - self.k + r]], cirq.X(qubits[j])))
 
-        for i in range(self.r):
-            circuit.append(cirq.H(qubits[i]))
+        gate_dict = {'X': cirq.X, 'Y': cirq.Y, 'Z': cirq.Z}
 
-            if self.M[i][i] == 'Y' or self.M[i][i] == 'Z':
-                circuit.append(cirq.S(qubits[i]))
+        for r in range(self.r):
+            circuit.append(cirq.H(qubits[r]))
 
-            for j in range(self.n):
-                if j == i:
+            if self.M[r][r] == 'Y' or self.M[r][r] == 'Z':
+                circuit.append(cirq.S(qubits[r]))
+
+            for n in range(self.n):
+                if n == r:
                     continue
-                if self.M[i][j] == 'I':
+                if self.M[r][n] == 'I':
                     continue
-                op = gate_dict[self.M[i][j]]
-                circuit.append(cirq.ControlledOperation([qubits[i]], op(qubits[j])))
-
+                op = gate_dict[self.M[r][n]]
+                circuit.append(cirq.ControlledOperation([qubits[r]], op(qubits[n])))
         # At this stage, the state vector should be equal to equations 3.17 and 3.18.
 
-def test_decoder(input_val, error_loc=None):
-    code = StabilitizerCode(group_generators=['XZZXI', 'IXZZX', 'XIXZZ', 'ZXIXZ'])
+    def compute_syndromes(self, circuit, qubits):
+        qubit_map = {qubit: i for i, qubit in enumerate(qubits)}
 
-    circuit = cirq.Circuit()
-    qubits = [cirq.NamedQubit(name) for name in ['0', '1', '2', '3', 'c', 'd']]
-    qubit_map = {qubit: i for i, qubit in enumerate(qubits)}
+        results = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0)
+        state_vector = results.state_vector()
 
-    code.encode(circuit, qubits)
+        syndromes = []
+        for r in range(self.r):
+            pauli_string = cirq.PauliString(dict(zip(qubits, self.M[r])))
+            trace = pauli_string.expectation_from_state_vector(state_vector, qubit_map)
+            syndromes.append(round(trace.real))
+        return tuple(syndromes)
 
-    if error_loc:
-        circuit.append(cirq.X(qubits[error_loc]))
+    def correct(self, circuit, qubits, ancillas):
+        # We set the ancillas so that measuring them directly would be the same
+        # as measuring the qubits with Pauli strings. In other words, we store
+        # the syndrome inside the ancillas.
 
-    for r in range(code.k):
-        for i in range(code.n):
-            if code.Z[r][i] == 'Z':
-                circuit.append(cirq.ControlledOperation(
-                    [qubits[i]], cirq.X(qubits[code.n + r])))
+        gate_dict = {'X': cirq.X, 'Y': cirq.Y, 'Z': cirq.Z}
+
+        for r in range(self.r):
+            circuit.append(cirq.H(ancillas[r]))
+            for n in range(self.n):
+                if self.M[r][n] == 'I':
+                    continue
+                op = gate_dict[self.M[r][n]]
+                circuit.append(cirq.ControlledOperation([ancillas[r]], op(qubits[n])))
+            circuit.append(cirq.H(ancillas[r]))
+
+        # At this stage, the ancillas are equal to the syndrome. Now, we apply
+        # the errors back to correct the code.
+
+        for syndrome, correction in self.syndromes_to_corrections.items():
+            op = gate_dict[correction[0]]
+            n = correction[1]
+
+            # We do a Boolean operation on the ancillas (i.e. syndrome).
+            for r in range(self.r):
+                if syndrome[r] == 1:
+                    circuit.append(cirq.X(ancillas[r]))
+
+            circuit.append(cirq.ControlledOperation(ancillas, op(qubits[n])))
+
+            for r in range(self.r):
+                if syndrome[r] == 1:
+                    circuit.append(cirq.X(ancillas[r]))
 
 
+code = StabilitizerCode(group_generators=['XZZXI', 'IXZZX', 'XIXZZ', 'ZXIXZ'])
 
-    results = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=(input_val * 2))
-    state_vector = results.state_vector()
+print(code.syndromes_to_corrections)
 
-    # print(circuit)
-    # print(cirq.dirac_notation(state_vector * 4))
+circuit = cirq.Circuit()
+qubits = [cirq.NamedQubit(name) for name in ['0', '1', '2', '3', 'c']]
+ancillas = [cirq.NamedQubit(name) for name in ['d0', 'd1', 'd2', 'd3']]
 
-    pauli_string = cirq.PauliString(dict(zip(qubits, 'IIIIIZ')))
-    trace = pauli_string.expectation_from_state_vector(state_vector, qubit_map)
+code.encode(circuit, qubits)
+circuit.append(cirq.X(qubits[3]))
 
-    return trace
+code.correct(circuit, qubits, ancillas)
 
-for error_loc in [None, 0, 1, 2, 3, 4]:
-    for input_val in range(2):
-# for error_loc in [None]:
-#     for input_val in range(1, 2):
-        print('\n')
-        for _ in range(1):
-            decoded_val = test_decoder(input_val, error_loc)
-            print('error_loc=%s\tinput=%d\tdecoded=%s' % (error_loc, input_val, decoded_val))
+# for r in range(4):
+#     circuit.append(cirq.measure(ancillas[r]))
+
+#print(circuit)
+
+
+results = cirq.Simulator().simulate(circuit, qubit_order=(qubits + ancillas), initial_state=1 * 2**4)
+#print([1 - 2 * m.item() for m in results.measurements.values()])
+
+state_vector = results.state_vector()
+print(cirq.dirac_notation(4 * state_vector))
+
+
