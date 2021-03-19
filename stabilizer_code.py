@@ -197,7 +197,9 @@ def run_code(input_val, error_gate, error_loc):
 
     code.correct(circuit, qubits, ancillas)
 
-    results = cirq.Simulator().simulate(circuit, qubit_order=(qubits + ancillas), initial_state=(input_val * 2**4))
+    results = cirq.Simulator().simulate(
+        circuit, qubit_order=(qubits + ancillas), initial_state=(input_val * 2**4)
+    )
 
     qubit_map = {qubit: i for i, qubit in enumerate(qubits + ancillas)}
     pauli_string = cirq.PauliString(dict(zip(qubits, code.Z[0])))
@@ -209,7 +211,9 @@ def run_code(input_val, error_gate, error_loc):
 for input_val in [0, 1]:
     # No error:
     output_val = run_code(input_val, None, None)
+    print('%d %f' % (input_val, output_val))
 
-    for error_gate in [cirq.X, cirq.Z]:
+    for error_gate in [cirq.X, cirq.Y, cirq.Z]:
         for eror_loc in range(5):
+            output_val = run_code(input_val, None, None)
             print('%d %f' % (input_val, output_val))
