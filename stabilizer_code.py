@@ -149,19 +149,6 @@ class StabilitizerCode(object):
                 circuit.append(cirq.ControlledOperation([qubits[r]], op(qubits[n])))
         # At this stage, the state vector should be equal to equations 3.17 and 3.18.
 
-    def compute_syndromes(self, circuit, qubits):
-        qubit_map = {qubit: i for i, qubit in enumerate(qubits)}
-
-        results = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0)
-        state_vector = results.state_vector()
-
-        syndromes = []
-        for r in range(self.r):
-            pauli_string = cirq.PauliString(dict(zip(qubits, self.M[r])))
-            trace = pauli_string.expectation_from_state_vector(state_vector, qubit_map)
-            syndromes.append(round(trace.real))
-        return tuple(syndromes)
-
     def correct(self, circuit, qubits, ancillas):
         # We set the ancillas so that measuring them directly would be the same
         # as measuring the qubits with Pauli strings. In other words, we store
@@ -197,29 +184,32 @@ class StabilitizerCode(object):
                     circuit.append(cirq.X(ancillas[r]))
 
 
-code = StabilitizerCode(group_generators=['XZZXI', 'IXZZX', 'XIXZZ', 'ZXIXZ'])
+def run_code(input_val, error_gate, error_loc):
+    code = StabilitizerCode(group_generators=['XZZXI', 'IXZZX', 'XIXZZ', 'ZXIXZ'])
 
-print(code.syndromes_to_corrections)
+    circuit = cirq.Circuit()
+    qubits = [cirq.NamedQubit(name) for name in ['0', '1', '2', '3', 'c']]
+    ancillas = [cirq.NamedQubit(name) for name in ['d0', 'd1', 'd2', 'd3']]
 
-circuit = cirq.Circuit()
-qubits = [cirq.NamedQubit(name) for name in ['0', '1', '2', '3', 'c']]
-ancillas = [cirq.NamedQubit(name) for name in ['d0', 'd1', 'd2', 'd3']]
+    code.encode(circuit, qubits)
+    if error_gate and error_loc:
+        circuit.append(error_gate(qubits[error_loc]))
 
-code.encode(circuit, qubits)
-circuit.append(cirq.X(qubits[3]))
+    code.correct(circuit, qubits, ancillas)
 
-code.correct(circuit, qubits, ancillas)
+    results = cirq.Simulator().simulate(circuit, qubit_order=(qubits + ancillas), initial_state=(input_val * 2**4))
 
-# for r in range(4):
-#     circuit.append(cirq.measure(ancillas[r]))
+    qubit_map = {qubit: i for i, qubit in enumerate(qubits + ancillas)}
+    pauli_string = cirq.PauliString(dict(zip(qubits, code.Z[0])))
+    trace = pauli_string.expectation_from_state_vector(results.state_vector(), qubit_map)
 
-#print(circuit)
-
-
-results = cirq.Simulator().simulate(circuit, qubit_order=(qubits + ancillas), initial_state=1 * 2**4)
-#print([1 - 2 * m.item() for m in results.measurements.values()])
-
-state_vector = results.state_vector()
-print(cirq.dirac_notation(4 * state_vector))
+    return (1 - trace.real) / 2
 
 
+for input_val in [0, 1]:
+    # No error:
+    output_val = run_code(input_val, None, None)
+
+    for error_gate in [cirq.X, cirq.Z]:
+        for eror_loc in range(5):
+            print('%d %f' % (input_val, output_val))
