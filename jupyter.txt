@@ -1,0 +1,5 @@
+python3 -m pip install jupyter
+
+jupyter notebook --port=8080
+
+ssh -L 8080:localhost:8080 <remote_user>@<remote_host>
