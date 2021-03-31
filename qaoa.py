@@ -24,6 +24,7 @@ def main():
 
     # Compute best possible cut value via brute force search
     max_cut = brute_force(graph, n)
+    print(max_cut)
 
     # Make qubits
     circuit = cirq.Circuit()
@@ -32,10 +33,14 @@ def main():
     # Prepare uniform superposition
     circuit.append(cirq.H.on_each(*qubits))
 
-    theta = np.pi / 2.0
+    theta = 0.1 * np.pi / 2.0
     for i, j in graph.edges:
         circuit.append(cirq.ZZPowGate(exponent=(2.0 * theta / np.pi), global_shift=-0.5).on(qubits[i], qubits[j]))
 
+    results = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0)
+    phi = results.state_vector()
+    alpha = np.round(np.arctan2(phi.real, phi.imag) / theta)
+    print(alpha)
 
 
 if __name__ == '__main__':
