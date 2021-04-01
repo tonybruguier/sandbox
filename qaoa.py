@@ -13,7 +13,7 @@ def brute_force(graph, n):
     vecs = (-1) ** bitstrings
     vals = 0.5 * np.sum(vecs * (mat @ vecs.T).T, axis=-1)
     vals = 0.5 * (graph.size() - vals)
-    return np.max(vals)
+    return np.round(vals)
 
 
 def main():
@@ -23,8 +23,8 @@ def main():
     graph = networkx.random_regular_graph(3, n)
 
     # Compute best possible cut value via brute force search
-    max_cut = brute_force(graph, n)
-    print(max_cut)
+    cuts = brute_force(graph, n)
+    print(cuts)
 
     # Make qubits
     circuit = cirq.Circuit()
@@ -35,11 +35,14 @@ def main():
 
     theta = 0.1 * np.pi / 2.0
     for i, j in graph.edges:
-        circuit.append(cirq.ZZPowGate(exponent=(2.0 * theta / np.pi), global_shift=-0.5).on(qubits[i], qubits[j]))
+        circuit.append(cirq.CNOT(qubits[i], qubits[j]))
+        circuit.append(cirq.Rz(rads=theta).on(qubits[j]))
+        circuit.append(cirq.CNOT(qubits[i], qubits[j]))
 
     results = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0)
     phi = results.state_vector()
-    alpha = np.round(np.arctan2(phi.real, phi.imag) / theta)
+    alpha = np.round(np.arctan2(phi.real, phi.imag) / theta * 2.0) / 2.0
+
     print(alpha)
 
 
