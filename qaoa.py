@@ -39,11 +39,15 @@ def main():
         circuit.append(cirq.Rz(rads=theta).on(qubits[j]))
         circuit.append(cirq.CNOT(qubits[i], qubits[j]))
 
-    results = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0)
-    phi = results.state_vector()
+    phi = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()
     alpha = np.round(np.arctan2(phi.real, phi.imag) / theta * 2.0) / 2.0
 
     print(alpha)
+
+    circuit.append(cirq.qft(*qubits))
+    phi = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()
+
+    print(phi)
 
 
 if __name__ == '__main__':
