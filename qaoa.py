@@ -1,11 +1,13 @@
 import itertools
+import math
 
 import numpy as np
 import networkx
 import scipy.optimize
+from sympy.parsing.sympy_parser import parse_expr
 
 import cirq
-
+import examples.hamiltonian_representation as hr
 
 def brute_force(graph, n):
     bitstrings = np.array(list(itertools.product(range(2), repeat=n)))
@@ -26,29 +28,20 @@ def main():
     cuts = brute_force(graph, n)
     print(cuts)
 
-    # Make qubits
-    circuit = cirq.Circuit()
-    qubits = cirq.LineQubit.range(n)
+    # Build the boolean expressions
+    booleans = [parse_expr(f"x{i} ^ x{j}") for i, j in graph.edges]
 
-    # Prepare uniform superposition
+    name_to_id = hr.get_name_to_id(booleans)
+    hamiltonians = [hr.build_hamiltonian_from_boolean(boolean, name_to_id) for boolean in booleans]
+
+    qubits = [cirq.NamedQubit(name) for name in name_to_id.keys()]
+    circuit = cirq.Circuit()
     circuit.append(cirq.H.on_each(*qubits))
 
-    theta = 0.1 * np.pi / 2.0
-    for i, j in graph.edges:
-        circuit.append(cirq.CNOT(qubits[i], qubits[j]))
-        circuit.append(cirq.Rz(rads=theta).on(qubits[j]))
-        circuit.append(cirq.CNOT(qubits[i], qubits[j]))
+    theta = 0.1 * math.pi
+    circuit += hr.build_circuit_from_hamiltonians(hamiltonians, qubits, theta)
 
-    phi = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()
-    alpha = np.round(np.arctan2(phi.real, phi.imag) / theta * 2.0) / 2.0
-
-    print(alpha)
-
-    circuit.append(cirq.qft(*qubits))
-    phi = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()
-
-    print(phi)
-
+    print(circuit)
 
 if __name__ == '__main__':
     main()
