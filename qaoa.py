@@ -1,5 +1,4 @@
 import itertools
-import math
 
 import numpy as np
 import networkx
@@ -9,6 +8,7 @@ from sympy.parsing.sympy_parser import parse_expr
 import cirq
 import examples.hamiltonian_representation as hr
 
+
 def brute_force(graph, n):
     bitstrings = np.array(list(itertools.product(range(2), repeat=n)))
     mat = networkx.adjacency_matrix(graph, nodelist=sorted(graph.nodes))
@@ -16,6 +16,7 @@ def brute_force(graph, n):
     vals = 0.5 * np.sum(vecs * (mat @ vecs.T).T, axis=-1)
     vals = 0.5 * (graph.size() - vals)
     return max(np.round(vals))
+
 
 def qaoa(booleans, repetitions=10, maxiter=250, p=5):
     name_to_id = hr.get_name_to_id(booleans)
@@ -48,7 +49,8 @@ def qaoa(booleans, repetitions=10, maxiter=250, p=5):
         return -np.mean(values)
 
     x0 = np.zeros(2 * p)
-    results = scipy.optimize.minimize(f, x0, method='COBYLA', options={'maxiter': maxiter, 'disp': True})
+    scipy.optimize.minimize(f, x0, method='COBYLA', options={'maxiter': maxiter, 'disp': True})
+
 
 def main():
     # Set problem parameters
