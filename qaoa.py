@@ -17,7 +17,7 @@ def brute_force(graph, n):
     vals = 0.5 * (graph.size() - vals)
     return max(np.round(vals))
 
-def qaoa(booleans, repetitions=10, maxiter=50, p=5):
+def qaoa(booleans, repetitions=10, maxiter=250, p=5):
     name_to_id = hr.get_name_to_id(booleans)
     hamiltonians = [hr.build_hamiltonian_from_boolean(boolean, name_to_id) for boolean in booleans]
     qubits = [cirq.NamedQubit(name) for name in name_to_id.keys()]
@@ -43,28 +43,27 @@ def qaoa(booleans, repetitions=10, maxiter=50, p=5):
             subs = {name: val == 1 for name, val in zip(name_to_id.keys(), bitstrings[rep, :])}
             values.append(sum(1 if boolean.subs(subs) else 0 for boolean in booleans))
 
+        print('μ=%.2f max=%d' % (np.mean(values), max(values)))
+
         return -np.mean(values)
 
     x0 = np.zeros(2 * p)
-    scipy.optimize.minimize(f, x0, method='COBYLA', options={'maxiter': maxiter, 'disp': True})
-
-    return 0
+    results = scipy.optimize.minimize(f, x0, method='COBYLA', options={'maxiter': maxiter, 'disp': True})
 
 def main():
     # Set problem parameters
-    n = 12
-    p = 2
+    n = 6
 
-    # Generate a random 3-regular graph on n nodes
-    graph = networkx.random_regular_graph(3, n)
+    # Generate a random bipartite graph.
+    graph = networkx.complete_multipartite_graph(n, n)
 
     # Compute best possible cut value via brute force search
-    print('Brute force max cut: %d' % (brute_force(graph, n)))
+    print('Brute force max cut: %d' % (brute_force(graph, 2 * n)))
 
     # Build the boolean expressions
     booleans = [parse_expr(f"x{i} ^ x{j}") for i, j in graph.edges]
 
-    print('QAOA max cut: %d' % (qaoa(booleans)))
+    qaoa(booleans)
 
 
 if __name__ == '__main__':
