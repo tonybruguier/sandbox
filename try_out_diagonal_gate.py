@@ -1,12 +1,26 @@
 import cirq
 import numpy as np
+from sympy.parsing.sympy_parser import parse_expr
+import examples.hamiltonian_representation as hr
+import math
 
-circuit = cirq.Circuit()
-qubits = cirq.LineQubit.range(4)
+qubits = [cirq.NamedQubit(name) for name in ['q0', 'q1']]
+theta = 0.1 * math.pi
 
-op = cirq.DiagonalGate([0.25 * np.pi, 0.25 * np.pi, 0.5 * np.pi, 0.5 * np.pi])
+# Diagonal gate:
+circuit1 = cirq.Circuit()
+angles = [theta/4.0, -theta/4.0, -theta/4.0, theta/4.0]
+circuit1.append(cirq.decompose(cirq.DiagonalGate(angles).on(*qubits)))
+print(circuit1)
+print(np.diag(cirq.unitary(circuit1)))
 
-print(np.diag(cirq.protocols.unitary(op)))
-circuit.append(cirq.decompose(op.on(qubits[0], qubits[1])))
+# Hamiltonian:
+circuit2 = cirq.Circuit()
 
-print(circuit)
+boolean = parse_expr('q0 ^ q1')
+name_to_id = hr.get_name_to_id([boolean])
+hamiltonian = hr.build_hamiltonian_from_boolean(boolean, name_to_id)
+
+circuit2 += hr.build_circuit_from_hamiltonians([hamiltonian], qubits, theta)
+print(circuit2)
+print(np.diag(cirq.unitary(circuit2)))
