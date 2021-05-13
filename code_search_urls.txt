@@ -1,0 +1,4 @@
+https://sourcegraph.com/search?q=%28repo:%5Egithub%5C.com/quantumlib/Cirq%24+or+repo:%5Egithub%5C.com/quantumlib/ReCirq%24+or+repo:%5Egithub%5C.com/tensorflow/quantum%24+or+repo:%5Egithub%5C.com/jcmgray/quimb%24+or+repo:%5Egithub%5C.com/unitaryfund/mitiq%24+or+repo:%5Egithub%5C.com/cgranade/python-quaec%24+or+repo:%5Egithub%5C.com/PennyLaneAI/pennylane%24+or+repo:%5Egithub%5C.com/PennyLaneAI/pennylane-cirq%24%29&patternType=literal
+
+https://sourcegraph.com/search?q=%s+and+%28repo:%5Egithub%5C.com/quantumlib/Cirq%24+or+repo:%5Egithub%5C.com/quantumlib/ReCirq%24+or+repo:%5Egithub%5C.com/tensorflow/quantum%24+or+repo:%5Egithub%5C.com/jcmgray/quimb%24+or+repo:%5Egithub%5C.com/unitaryfund/mitiq%24+or+repo:%5Egithub%5C.com/cgranade/python-quaec%24+or+repo:%5Egithub%5C.com/PennyLaneAI/pennylane%24+or+repo:%5Egithub%5C.com/PennyLaneAI/pennylane-cirq%24%29&patternType=literal
+
