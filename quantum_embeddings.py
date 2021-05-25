@@ -15,8 +15,9 @@
 
 
 import cirq
+import numpy as np
 
-def build_arbitrary_unitary(qubits, n_layers):
+def build_arbitrary_unitary(qubits, n_layers, params):
     # Circuit-centric quantum classifiers
     # Maria Schuld, Alex Bocharov, Krysta Svore, Nathan Wiebe
     # https://arxiv.org/abs/1804.00633
@@ -28,11 +29,14 @@ def build_arbitrary_unitary(qubits, n_layers):
     else:
         ranges [0] * n_layers
 
+    assert params.shape[0] == n_layers
+    assert params.shape[1] == len(qubits)
+
     for l in range(n_layers):
         for i in range(len(qubits)):
-            yield cirq.Rx(rads=0.1).on(qubits[i])
-            yield cirq.Ry(rads=0.1).on(qubits[i])
-            yield cirq.Rz(rads=0.1).on(qubits[i])
+            yield cirq.Rx(rads=params[l][i][0]).on(qubits[i])
+            yield cirq.Ry(rads=params[l][i][1]).on(qubits[i])
+            yield cirq.Rz(rads=params[l][i][2]).on(qubits[i])
 
         if len(qubits) > 0:
             for i in range(len(qubits)):
@@ -40,10 +44,13 @@ def build_arbitrary_unitary(qubits, n_layers):
                 yield cirq.CNOT(qubits[i], qubits[j])
 
 
+n_layers = 3
 qubits = cirq.LineQubit.range(8)
 
+params = np.random.rand(n_layers, len(qubits), 3)
+
 circuit = cirq.Circuit()
-for gate in build_arbitrary_unitary(qubits, 3):
+for gate in build_arbitrary_unitary(qubits, n_layers, params):
     circuit.append(gate)
 
 # def build_1d_circuit(x: float, theta: float, depth: int):
