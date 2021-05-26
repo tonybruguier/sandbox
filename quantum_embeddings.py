@@ -17,7 +17,7 @@
 import cirq
 import numpy as np
 
-def build_arbitrary_unitary(qubits, n_layers, params):
+def build_parametrized_unitary(qubits, n_layers, theta):
     # Circuit-centric quantum classifiers
     # Maria Schuld, Alex Bocharov, Krysta Svore, Nathan Wiebe
     # https://arxiv.org/abs/1804.00633
@@ -26,41 +26,36 @@ def build_arbitrary_unitary(qubits, n_layers, params):
     # https://sourcegraph.com/github.com/PennyLaneAI/pennylane/-/blob/pennylane/templates/layers/strongly_entangling.py
     if len(qubits) > 1:
         ranges = [(l % (len(qubits) - 1)) + 1 for l in range(n_layers)]
-    else:
-        ranges [0] * n_layers
 
-    assert params.shape[0] == n_layers
-    assert params.shape[1] == len(qubits)
+    assert theta.shape[0] == n_layers
+    assert theta.shape[1] == len(qubits)
 
     for l in range(n_layers):
         for i in range(len(qubits)):
-            yield cirq.Rx(rads=params[l][i][0]).on(qubits[i])
-            yield cirq.Ry(rads=params[l][i][1]).on(qubits[i])
-            yield cirq.Rz(rads=params[l][i][2]).on(qubits[i])
+            yield cirq.Rz(rads=theta[l][i][0]).on(qubits[i])
+            yield cirq.Ry(rads=theta[l][i][1]).on(qubits[i])
+            yield cirq.Rz(rads=theta[l][i][2]).on(qubits[i])
 
-        if len(qubits) > 0:
+        if len(qubits) > 1:
             for i in range(len(qubits)):
                 j = (i + ranges[l]) % len(qubits)
                 yield cirq.CNOT(qubits[i], qubits[j])
 
 
-n_layers = 3
-qubits = cirq.LineQubit.range(8)
+def build_param_rotator(qubits, x):
+    for qubit in qubits:
+        yield cirq.Rx(rads=x).on(qubit)
 
-params = np.random.rand(n_layers, len(qubits), 3)
+n_layers = 2
+qubits = cirq.LineQubit.range(3)
+theta = np.random.rand(n_layers, len(qubits), 3)
+x = 0.123 * np.pi
+
 
 circuit = cirq.Circuit()
-for gate in build_arbitrary_unitary(qubits, n_layers, params):
+for gate in build_parametrized_unitary(qubits, n_layers, theta):
     circuit.append(gate)
-
-# def build_1d_circuit(x: float, theta: float, depth: int):
-#     circuit = cirq.Circuit()
-#     q = cirq.NamedQubit('q')
-#     for _ in range(depth):
-#         circuit.append(cirq.Rx(rads=x).on(q))
-#         circuit.append(cirq.Ry(rads=theta).on(q))
-#     return circuit, [q]
-
-# circuit, qubits = build_1d_circuit(0.1, 0.2, 3)
+for gate in build_param_rotator(qubits, x):
+    circuit.append(gate)
 
 print(circuit)
