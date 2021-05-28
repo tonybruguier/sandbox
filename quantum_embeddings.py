@@ -13,6 +13,7 @@
 # Also useful to get started:
 # https://www.youtube.com/watch?v=mNR-7OmilIo
 
+import math
 
 import cirq
 import numpy as np
@@ -29,6 +30,7 @@ def build_parametrized_unitary(qubits, N, theta):
 
     assert theta.shape[0] == N
     assert theta.shape[1] == len(qubits)
+    assert theta.shape[2] == 3
 
     for l in range(N):
         for i in range(len(qubits)):
@@ -41,39 +43,52 @@ def build_parametrized_unitary(qubits, N, theta):
                 j = (i + ranges[l]) % len(qubits)
                 yield cirq.CNOT(qubits[i], qubits[j])
 
-
 def build_param_rotator(qubits, x):
     for qubit in qubits:
         yield cirq.Rx(rads=x).on(qubit)
 
-N = 2
-qubits = cirq.LineQubit.range(3)
-theta = np.random.rand(N, len(qubits), 3)
-x = 0.123 * np.pi
+def build_fidelity_swap_circuit(qubit, ancilla_fidelity, ancilla_truth, key):
+    # https://staff.fnwi.uva.nl/m.walter/physics491/lecture10.pdf
+    yield cirq.H(ancilla_fidelity)
+    yield cirq.CSWAP(ancilla_fidelity, qubit, ancilla_truth)
+    yield cirq.H(ancilla_fidelity)
+    yield cirq.measure(ancilla_fidelity, key=f"swap_test_{key}")
+
+def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
+    Np, Dp, Nu, Du, _ = theta.shape
+    assert Dp == len(qubits)
+    assert Du == len(qubits[0])
+    assert Dp == x.shape[0]
+    assert Dp == y.shape[0]
+
+    for dp in range(Dp):
+        yield cirq.Ry(rads=(math.pi * y[dp])).on(ancillas_truth[dp])
+
+    for np in range(Np):
+        for dp in range(Dp):
+            # Add a unitary:
+            yield build_parametrized_unitary(qubits[dp], Nu, theta[np, dp])
+            # Add the encoder:
+            yield build_param_rotator(qubits[dp], x[dp])
+
+    for dp in range(Dp):
+        yield build_fidelity_swap_circuit(qubits[dp][0], ancillas_fidelity[dp], ancillas_truth[dp], f"{dp}")
+
+Nu = 1  # Number of layers inside the unitary
+Du = 1  # Depth of the unitary:
+Np = 1  # Number of times the input is fed:
+Dp = 2  # Depth of the input
+
+qubits = [[cirq.NamedQubit(f"q_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
+ancillas_fidelity = [cirq.NamedQubit(f"af_p{dp}") for dp in range(Dp)]
+ancillas_truth = [cirq.NamedQubit(f"at_p{dp}") for dp in range(Dp)]
+
+theta = np.random.rand(Np, Dp, Nu, Du, 3)
+x = np.random.rand(Dp)
+y = np.asarray([1.0] * Dp)
 
 circuit = cirq.Circuit()
-for gate in build_parametrized_unitary(qubits, N, theta):
-    circuit.append(gate)
-for gate in build_param_rotator(qubits, x):
+for gate in build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
     circuit.append(gate)
 
 print(circuit)
-
-q0, q1, q2 = cirq.LineQubit.range(3)
-circuit = cirq.Circuit()
-
-# Should result in fidelity = 0.5:
-circuit.append(cirq.H(q1))
-
-# https://staff.fnwi.uva.nl/m.walter/physics491/lecture10.pdf
-circuit.append(cirq.H(q0))
-circuit.append(cirq.CSWAP(q0, q1, q2))
-circuit.append(cirq.H(q0))
-circuit.append(cirq.measure(q0, key='swap_test'))
-
-print(circuit)
-
-simulator = cirq.Simulator()
-run = simulator.run(circuit, repetitions=100)
-estimated_fidelity = 1.0 - 2.0 * np.average(run.measurements['swap_test'])
-print('Estimated fidelity: %.3f' % (estimated_fidelity))
