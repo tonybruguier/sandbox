@@ -51,7 +51,6 @@ qubits = cirq.LineQubit.range(3)
 theta = np.random.rand(n_layers, len(qubits), 3)
 x = 0.123 * np.pi
 
-
 circuit = cirq.Circuit()
 for gate in build_parametrized_unitary(qubits, n_layers, theta):
     circuit.append(gate)
@@ -59,3 +58,22 @@ for gate in build_param_rotator(qubits, x):
     circuit.append(gate)
 
 print(circuit)
+
+q0, q1, q2 = cirq.LineQubit.range(3)
+circuit = cirq.Circuit()
+
+# Should result in fidelity = 0.5:
+circuit.append(cirq.H(q1))
+
+# https://staff.fnwi.uva.nl/m.walter/physics491/lecture10.pdf
+circuit.append(cirq.H(q0))
+circuit.append(cirq.CSWAP(q0, q1, q2))
+circuit.append(cirq.H(q0))
+circuit.append(cirq.measure(q0, key='swap_test'))
+
+print(circuit)
+
+simulator = cirq.Simulator()
+run = simulator.run(circuit, repetitions=10000)
+estimated_fidelity = 1.0 - 2.0 * np.average(run.measurements['swap_test'])
+print('Estimated fidelity: %.3f' % (estimated_fidelity))
