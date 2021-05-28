@@ -17,7 +17,7 @@
 import cirq
 import numpy as np
 
-def build_parametrized_unitary(qubits, n_layers, theta):
+def build_parametrized_unitary(qubits, N, theta):
     # Circuit-centric quantum classifiers
     # Maria Schuld, Alex Bocharov, Krysta Svore, Nathan Wiebe
     # https://arxiv.org/abs/1804.00633
@@ -25,12 +25,12 @@ def build_parametrized_unitary(qubits, n_layers, theta):
     # PennyLane StronglyEntanglingLayers:
     # https://sourcegraph.com/github.com/PennyLaneAI/pennylane/-/blob/pennylane/templates/layers/strongly_entangling.py
     if len(qubits) > 1:
-        ranges = [(l % (len(qubits) - 1)) + 1 for l in range(n_layers)]
+        ranges = [(l % (len(qubits) - 1)) + 1 for l in range(N)]
 
-    assert theta.shape[0] == n_layers
+    assert theta.shape[0] == N
     assert theta.shape[1] == len(qubits)
 
-    for l in range(n_layers):
+    for l in range(N):
         for i in range(len(qubits)):
             yield cirq.Rz(rads=theta[l][i][0]).on(qubits[i])
             yield cirq.Ry(rads=theta[l][i][1]).on(qubits[i])
@@ -46,13 +46,13 @@ def build_param_rotator(qubits, x):
     for qubit in qubits:
         yield cirq.Rx(rads=x).on(qubit)
 
-n_layers = 2
+N = 2
 qubits = cirq.LineQubit.range(3)
-theta = np.random.rand(n_layers, len(qubits), 3)
+theta = np.random.rand(N, len(qubits), 3)
 x = 0.123 * np.pi
 
 circuit = cirq.Circuit()
-for gate in build_parametrized_unitary(qubits, n_layers, theta):
+for gate in build_parametrized_unitary(qubits, N, theta):
     circuit.append(gate)
 for gate in build_param_rotator(qubits, x):
     circuit.append(gate)
@@ -74,6 +74,6 @@ circuit.append(cirq.measure(q0, key='swap_test'))
 print(circuit)
 
 simulator = cirq.Simulator()
-run = simulator.run(circuit, repetitions=10000)
+run = simulator.run(circuit, repetitions=100)
 estimated_fidelity = 1.0 - 2.0 * np.average(run.measurements['swap_test'])
 print('Estimated fidelity: %.3f' % (estimated_fidelity))
