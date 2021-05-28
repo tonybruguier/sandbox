@@ -61,8 +61,9 @@ def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
     assert Dp == x.shape[0]
     assert Dp == y.shape[0]
 
-    for dp in range(Dp):
-        yield cirq.Ry(rads=(math.pi * y[dp])).on(ancillas_truth[dp])
+    for du in range(Du):
+        for dp in range(Dp):
+            yield cirq.Ry(rads=(math.pi * y[dp])).on(ancillas_truth[dp][du])
 
     for np in range(Np):
         for dp in range(Dp):
@@ -71,8 +72,9 @@ def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
             # Add the encoder:
             yield build_param_rotator(qubits[dp], x[dp])
 
-    for dp in range(Dp):
-        yield build_fidelity_swap_circuit(qubits[dp][0], ancillas_fidelity[dp], ancillas_truth[dp], f"{dp}")
+    for du in range(Du):
+        for dp in range(Dp):
+            yield build_fidelity_swap_circuit(qubits[dp][du], ancillas_fidelity[dp][du], ancillas_truth[dp][du], f"p{dp}_u{du}")
 
 Nu = 1  # Number of layers inside the unitary
 Du = 1  # Depth of the unitary:
@@ -80,8 +82,8 @@ Np = 1  # Number of times the input is fed:
 Dp = 2  # Depth of the input
 
 qubits = [[cirq.NamedQubit(f"q_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
-ancillas_fidelity = [cirq.NamedQubit(f"af_p{dp}") for dp in range(Dp)]
-ancillas_truth = [cirq.NamedQubit(f"at_p{dp}") for dp in range(Dp)]
+ancillas_fidelity = [[cirq.NamedQubit(f"af_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
+ancillas_truth = [[cirq.NamedQubit(f"at_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
 
 theta = np.random.rand(Np, Dp, Nu, Du, 3)
 x = np.random.rand(Dp)
