@@ -14,9 +14,10 @@
 # https://www.youtube.com/watch?v=mNR-7OmilIo
 
 import math
+import numpy as np
+import scipy.optimize
 
 import cirq
-import numpy as np
 
 def build_parametrized_unitary(qubits, N, theta):
     # Circuit-centric quantum classifiers
@@ -76,6 +77,7 @@ def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
         for dp in range(Dp):
             yield build_fidelity_swap_circuit(qubits[dp][du], ancillas_fidelity[dp][du], ancillas_truth[dp][du], f"p{dp}_u{du}")
 
+# Some constants and qubits.
 Nu = 1  # Number of layers inside the unitary
 Du = 2  # Depth of the unitary:
 Np = 3  # Number of times the input is fed:
@@ -85,17 +87,24 @@ qubits = [[cirq.NamedQubit(f"q_p{dp}_u{du}") for du in range(Du)] for dp in rang
 ancillas_fidelity = [[cirq.NamedQubit(f"af_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
 ancillas_truth = [[cirq.NamedQubit(f"at_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
 
-theta = np.random.rand(Np, Dp, Nu, Du, 3)
-x = np.random.rand(Dp)
-y = np.asarray([1.0] * Dp)
+def f(theta):
+    theta = np.reshape(theta, (Np, Dp, Nu, Du, 3))
 
-circuit = cirq.Circuit()
-for gate in build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
-    circuit.append(gate)
+    x = np.random.normal(size=(2))
+    y = np.asarray([1.0 if x[0] ** 2 + x[1] ** 2 < 0.5 else 0.0, 0.0])
 
-simulator = cirq.Simulator()
-run = simulator.run(circuit, repetitions=1000)
+    circuit = cirq.Circuit()
+    for gate in build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
+        circuit.append(gate)
 
-estimated_fidelity = 1.0 - 2.0 * np.average([np.average(x) for x in run.measurements.values()])
+    simulator = cirq.Simulator()
+    run = simulator.run(circuit, repetitions=1000)
 
-print('%.3f' % (estimated_fidelity))
+    estimated_fidelity = 1.0 - 2.0 * np.average([np.average(x) for x in run.measurements.values()])
+
+    print('%.3f' % (estimated_fidelity))
+
+    return -estimated_fidelity
+
+theta0 = np.random.normal(size=(Np * Dp *  Nu * Du * 3))
+scipy.optimize.minimize(f, theta0, method='Nelder-Mead', options={'maxiter': 100})
