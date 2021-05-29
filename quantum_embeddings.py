@@ -77,8 +77,8 @@ def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
             yield build_fidelity_swap_circuit(qubits[dp][du], ancillas_fidelity[dp][du], ancillas_truth[dp][du], f"p{dp}_u{du}")
 
 Nu = 1  # Number of layers inside the unitary
-Du = 1  # Depth of the unitary:
-Np = 1  # Number of times the input is fed:
+Du = 2  # Depth of the unitary:
+Np = 3  # Number of times the input is fed:
 Dp = 2  # Depth of the input
 
 qubits = [[cirq.NamedQubit(f"q_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
@@ -93,4 +93,9 @@ circuit = cirq.Circuit()
 for gate in build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
     circuit.append(gate)
 
-print(circuit)
+simulator = cirq.Simulator()
+run = simulator.run(circuit, repetitions=1000)
+
+estimated_fidelity = 1.0 - 2.0 * np.average([np.average(x) for x in run.measurements.values()])
+
+print('%.3f' % (estimated_fidelity))
