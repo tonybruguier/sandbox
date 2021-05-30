@@ -8,3 +8,5 @@ python3 -m pip install networkx
 python3 -m pip install tensornetwork
 python3 -m pip install toml
 python3 -m pip install appdirs
+
+sudo apt install nvidia-cuda-toolkit
