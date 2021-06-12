@@ -10,7 +10,7 @@ export PYTHONPATH="/home/ubuntu/Dropbox/AWS_EC2_shared/git/cirq_master"
 # -------- install --------
 for ii in `cat requirements.txt | grep -v cirq`
 do
-  python3 -m pip install $ii --no-cache-dir
+  python3 -m pip install $ii
 done
 
 python3 -m pip install -U pip six numpy wheel setuptools mock 'future>=0.17.1'
@@ -25,21 +25,27 @@ sudo apt-mark hold bazel
 bazel --version
 
 # -------- Create new client --------
+
 git_new_branch() {
     NAME_OF_MY_CLIENT=$1
+    FROM_BRANCH=$2
 
     git clone git@github.com:tonybruguier/quantum.git ${NAME_OF_MY_CLIENT}
 
     cd ${NAME_OF_MY_CLIENT}
 
     git remote add upstream git@github.com:tensorflow/quantum.git
-    git pull upstream master
+    git checkout ${FROM_BRANCH}
+    git pull upstream ${FROM_BRANCH}
     git branch ${NAME_OF_MY_CLIENT}
     git checkout ${NAME_OF_MY_CLIENT}
 }
 
+# Make sure you are using python3!
+
 ./configure
 ./scripts/test_all.sh
+./scripts/build_pip_package_test.sh
 
 # -------- bazeltest --------
 ./configure
