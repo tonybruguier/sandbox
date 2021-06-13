@@ -138,6 +138,8 @@ expectation = expectation_layer([circuits_input, commands_input])
 full_circuit = tfq.layers.AddCircuit()(circuits_input, append=model_circuit)
 model = tf.keras.Model(inputs=[circuits_input, commands_input], outputs=expectation)
 
+tf.keras.utils.plot_model(model, show_shapes=True, dpi=70)
+
 # simulator = cirq.Simulator()
 # run = simulator.run(circuit, repetitions=1000)
 # estimated_fidelity = 1.0 - 2.0 * np.average([np.average(x) for x in run.measurements.values()])
