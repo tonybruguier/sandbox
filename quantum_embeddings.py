@@ -13,11 +13,13 @@
 # Also useful to get started:
 # https://www.youtube.com/watch?v=mNR-7OmilIo
 
+import cirq
+import itertools
 import math
 import numpy as np
-import scipy.optimize
-
-import cirq
+import tensorflow as tf
+import tensorflow_quantum as tfq
+import sympy
 
 def build_parametrized_unitary(qubits, N, theta):
     # Circuit-centric quantum classifiers
@@ -29,9 +31,9 @@ def build_parametrized_unitary(qubits, N, theta):
     if len(qubits) > 1:
         ranges = [(l % (len(qubits) - 1)) + 1 for l in range(N)]
 
-    assert theta.shape[0] == N
-    assert theta.shape[1] == len(qubits)
-    assert theta.shape[2] == 3
+    assert len(theta) == N
+    assert len(theta[0]) == len(qubits)
+    assert len(theta[0][0]) == 3
 
     for l in range(N):
         for i in range(len(qubits)):
@@ -51,15 +53,18 @@ def build_param_rotator(qubits, x):
 def build_fidelity_swap_circuit(qubit, ancilla_fidelity, ancilla_truth, key):
     # https://staff.fnwi.uva.nl/m.walter/physics491/lecture10.pdf
     yield cirq.H(ancilla_fidelity)
-    yield cirq.CSWAP(ancilla_fidelity, qubit, ancilla_truth)
+    # CSWAP cannot be serialize, so it is decomposed.
+    yield cirq.decompose(cirq.CSWAP(ancilla_fidelity, qubit, ancilla_truth))
     yield cirq.H(ancilla_fidelity)
-    yield cirq.measure(ancilla_fidelity, key=f"swap_test_{key}")
 
 def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
-    Np, Dp, Nu, Du, _ = theta.shape
+    Np = len(theta)
+    Dp = len(theta[0])
+    Nu = len(theta[0][0])
+    Du = len(theta[0][0][0])
     assert Dp == len(qubits)
     assert Du == len(qubits[0])
-    assert Dp == x.shape[0]
+    assert Dp == len(x)
     assert Dp == y.shape[0]
 
     for du in range(Du):
@@ -69,7 +74,7 @@ def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
     for np in range(Np):
         for dp in range(Dp):
             # Add a unitary:
-            yield build_parametrized_unitary(qubits[dp], Nu, theta[np, dp])
+            yield build_parametrized_unitary(qubits[dp], Nu, theta[np][dp])
             # Add the encoder:
             yield build_param_rotator(qubits[dp], x[dp])
 
@@ -79,32 +84,62 @@ def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
 
 # Some constants and qubits.
 Nu = 1  # Number of layers inside the unitary
-Du = 2  # Depth of the unitary:
-Np = 3  # Number of times the input is fed:
+Du = 1  # Depth of the unitary:
+Np = 1  # Number of times the input is fed:
 Dp = 2  # Depth of the input
 
-qubits = [[cirq.NamedQubit(f"q_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
-ancillas_fidelity = [[cirq.NamedQubit(f"af_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
-ancillas_truth = [[cirq.NamedQubit(f"at_p{dp}_u{du}") for du in range(Du)] for dp in range(Dp)]
+qubits = [[cirq.GridQubit(du, dp) for du in range(Du)] for dp in range(Dp)]
+ancillas_fidelity = [[cirq.GridQubit(du + Du, dp) for du in range(Du)] for dp in range(Dp)]
+ancillas_truth = [[cirq.GridQubit(du + 2 * Du, dp) for du in range(Du)] for dp in range(Dp)]
 
-def f(theta):
-    theta = np.reshape(theta, (Np, Dp, Nu, Du, 3))
+theta = np.asarray([[[[[sympy.symbols(f"theta_{np}_{dp}_{nu}_{du}_{i}")
+    for i in range(3)]
+    for du in range(Du)]
+    for nu in range(Nu)]
+    for dp in range(Dp)]
+    for np in range(Np)])
 
-    x = np.random.normal(size=(2))
-    y = np.asarray([1.0 if x[0] ** 2 + x[1] ** 2 < 0.5 else 0.0, 0.0])
+theta_vals = np.random.normal(size=(Np, Dp, Nu, Du, 3))
 
-    circuit = cirq.Circuit()
-    for gate in build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
-        circuit.append(gate)
+x = np.asarray([sympy.symbols(f"x_{i}") for i in range(Dp)])
+x_vals = np.random.normal(size=(Dp))
 
-    simulator = cirq.Simulator()
-    run = simulator.run(circuit, repetitions=1000)
+y_vals = np.asarray([1.0 if sum(x_i**2 for x_i in x_vals) < 0.5 else 0.0, 0.0])
 
-    estimated_fidelity = 1.0 - 2.0 * np.average([np.average(x) for x in run.measurements.values()])
+model_circuit = cirq.Circuit()
+for gate in build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y_vals, theta):
+    model_circuit.append(gate)
 
-    print('%.3f' % (estimated_fidelity))
+# ---- Eval time ----
+# operators = [cirq.Z(af) for af in itertools.chain(*ancillas_fidelity)]
+# symbol_names = tuple(np.concatenate((x.reshape(-1), theta.reshape(-1),)))
+# symbol_values = np.concatenate((x_vals.reshape(-1), theta_vals.reshape(-1),))
+# symbol_values = np.expand_dims(symbol_values, 0)
+# exp = tfq.layers.Expectation()(
+#     model_circuit, symbol_names=symbol_names, symbol_values=symbol_values, operators=operators)
 
-    return -estimated_fidelity
+# ---- Train time ----
+control_params = tuple(theta.reshape(-1))
 
-theta0 = np.random.normal(size=(Np * Dp *  Nu * Du * 3))
-scipy.optimize.minimize(f, theta0, method='Nelder-Mead', options={'maxiter': 100})
+
+circuits_input = tf.keras.Input(shape=(),
+                                # The circuit-tensor has dtype `tf.string`
+                                dtype=tf.string,
+                                name='circuits_input')
+
+commands_input = tf.keras.Input(shape=(Dp,),
+                                dtype=tf.dtypes.float32,
+                                name='commands_input')
+
+operators = [cirq.Z(af) for af in itertools.chain(*ancillas_fidelity)]
+expectation_layer = tfq.layers.ControlledPQC(model_circuit, operators=operators)
+expectation = expectation_layer([circuits_input, commands_input])
+
+full_circuit = tfq.layers.AddCircuit()(circuits_input, append=model_circuit)
+model = tf.keras.Model(inputs=[circuits_input, commands_input], outputs=expectation)
+
+# simulator = cirq.Simulator()
+# run = simulator.run(circuit, repetitions=1000)
+# estimated_fidelity = 1.0 - 2.0 * np.average([np.average(x) for x in run.measurements.values()])
+
+optimizer = tf.keras.optimizers.Adam(lr=0.1)
