@@ -149,7 +149,7 @@ commands = np.array([[0], [0]], dtype=np.float32)
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.05)
 loss = tf.keras.losses.MeanSquaredError()
 model.compile(optimizer=optimizer, loss=loss)
-# history = model.fit(x=commands,
-#                     y=y_vals,
-#                     epochs=30,
-#                     verbose=0)
+history = model.fit(x=[tfq.convert_to_tensor([cirq.Circuit()]), commands],
+                    y=y_vals,
+                    epochs=30,
+                    verbose=0)
