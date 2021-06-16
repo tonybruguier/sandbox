@@ -32,15 +32,10 @@ model.compile(
     loss=tf.keras.losses.MeanSquaredError())
 
 num_examples = 7
-commands = np.array([[0]] * num_examples, dtype=np.float32)
-targets = np.array([[0]] * num_examples, dtype=np.float32)
+commands = np.array([[0] * num_examples], dtype=np.float32)
+targets = np.array([[0] * num_examples], dtype=np.float32)
 
-history = model.fit(x=[tfq.convert_to_tensor([cirq.Circuit()]), commands],
+history = model.fit(x=[tfq.convert_to_tensor([cirq.Circuit()]), commands, operators],
                     y=targets,
                     epochs=1,
                     verbose=0)
-
-# ValueError: Data cardinality is ambiguous:
-#   x sizes: 1, 7
-#   y sizes: 7
-# Make sure all arrays contain the same number of samples.
