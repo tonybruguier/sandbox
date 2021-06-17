@@ -18,7 +18,7 @@ model_circuit = cirq.Circuit(cirq.rz(beta)(qubit), cirq.ry(theta)(qubit))
 print(model_circuit)
 
 circuit_input = tf.keras.Input(shape=(), dtype=tf.string, name='circuit_input')
-beta_input = tf.keras.Input(shape=(1,),  dtype=tf.dtypes.float32, name='beta_input')
+beta_input = tf.keras.Input(shape=(num_examples,),  dtype=tf.dtypes.float32, name='beta_input')
 theta_input = tf.keras.Input(shape=(1,),  dtype=tf.dtypes.float32, name='theta_input')
 
 operators = [cirq.Z(qubit)]
@@ -27,7 +27,7 @@ expectation = expectation_layer([circuit_input, beta_input, theta_input])
 
 model = tf.keras.Model(
     inputs=[circuit_input, beta_input, theta_input],
-    outputs=expectation)
+    outputs=[expectation])
 
 model.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=0.05),
@@ -36,7 +36,7 @@ model.compile(
 commands = np.array([[0] * num_examples], dtype=np.float32)
 targets = np.array([[0] * num_examples], dtype=np.float32)
 
-history = model.fit(x=[tfq.convert_to_tensor([cirq.Circuit()]), commands, operators],
+history = model.fit(x=[tfq.convert_to_tensor([cirq.Circuit()]), commands, tfq.convert_to_tensor(operators)],
                     y=targets,
                     epochs=1,
                     verbose=0)
