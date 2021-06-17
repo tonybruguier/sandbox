@@ -5,6 +5,8 @@ import tensorflow as tf
 import tensorflow_quantum as tfq
 import sympy
 
+num_examples = 7
+
 # Changed once per example:
 beta = sympy.symbols('beta')
 # Same for all the examples:
@@ -31,7 +33,6 @@ model.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=0.05),
     loss=tf.keras.losses.MeanSquaredError())
 
-num_examples = 7
 commands = np.array([[0] * num_examples], dtype=np.float32)
 targets = np.array([[0] * num_examples], dtype=np.float32)
 

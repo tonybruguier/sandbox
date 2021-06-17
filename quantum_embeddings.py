@@ -142,10 +142,6 @@ tf.keras.utils.plot_model(model, show_shapes=True, dpi=70)
 
 commands = np.array([[0], [0]], dtype=np.float32)
 
-# simulator = cirq.Simulator()
-# run = simulator.run(circuit, repetitions=1000)
-# estimated_fidelity = 1.0 - 2.0 * np.average([np.average(x) for x in run.measurements.values()])
-
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.05)
 loss = tf.keras.losses.MeanSquaredError()
 model.compile(optimizer=optimizer, loss=loss)
