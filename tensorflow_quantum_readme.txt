@@ -17,7 +17,7 @@ python3 -m pip install -U pip six numpy wheel setuptools mock 'future>=0.17.1'
 
 python3 -m pip install -U keras_applications keras_preprocessing
 
-python3 -m pip install pydot graphviz pydot_ng pydotplus
+python3 -m pip install pydot graphviz pydot_ng pydotplus qutip
 
 sudo apt-get install graphviz
 
