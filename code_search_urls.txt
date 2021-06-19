@@ -3,4 +3,18 @@ https://sourcegraph.com/search?q=%28repo:%5Egithub%5C.com/quantumlib/Cirq%24+or+
 https://sourcegraph.com/search?q=%s+and+%28repo:%5Egithub%5C.com/quantumlib/Cirq%24+or+repo:%5Egithub%5C.com/quantumlib/qsim%24+or+repo:%5Egithub%5C.com/quantumlib/ReCirq%24+or+repo:%5Egithub%5C.com/tensorflow/quantum%24+or+repo:%5Egithub%5C.com/jcmgray/quimb%24+or+repo:%5Egithub%5C.com/unitaryfund/mitiq%24+or+repo:%5Egithub%5C.com/cgranade/python-quaec%24+or+repo:%5Egithub%5C.com/PennyLaneAI/pennylane%24+or+repo:%5Egithub%5C.com/XanaduAI/strawberryfields%24+or+repo:%5Egithub%5C.com/PennyLaneAI/pennylane-cirq%24+or+repo:%5Egithub%5C.com/qutip/qutip%24%29&patternType=literal
 
 
+github.com/quantumlib/Cirq
+github.com/quantumlib/qsim
+github.com/quantumlib/ReCirq
+github.com/tensorflow/quantum
+github.com/jcmgray/quimb
+github.com/unitaryfund/mitiq
+github.com/cgranade/python-quaec
+github.com/PennyLaneAI/pennylane
+github.com/XanaduAI/strawberryfields
+github.com/PennyLaneAI/pennylane-cirq
+github.com/qutip/qutip
 
+https://sourcegraph.com/search?q=context:%40tonybruguier
+
+https://sourcegraph.com/search?q=context:%40tonybruguier+%s&patternType=literal
