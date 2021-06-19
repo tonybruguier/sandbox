@@ -83,9 +83,9 @@ def build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y, theta):
             yield build_fidelity_swap_circuit(qubits[dp][du], ancillas_fidelity[dp][du], ancillas_truth[dp][du], f"p{dp}_u{du}")
 
 # Some constants and qubits.
-Nu = 1  # Number of layers inside the unitary
+Nu = 3  # Number of layers inside the unitary
 Du = 1  # Depth of the unitary:
-Np = 1  # Number of times the input is fed:
+Np = 2  # Number of times the input is fed:
 Dp = 2  # Depth of the input
 
 qubits = [[cirq.GridQubit(du, dp) for du in range(Du)] for dp in range(Dp)]
@@ -111,41 +111,11 @@ for gate in build_embed_circuit(qubits, ancillas_fidelity, ancillas_truth, x, y_
     model_circuit.append(gate)
 
 # ---- Eval time ----
-# operators = [cirq.Z(af) for af in itertools.chain(*ancillas_fidelity)]
-# symbol_names = tuple(np.concatenate((x.reshape(-1), theta.reshape(-1),)))
-# symbol_values = np.concatenate((x_vals.reshape(-1), theta_vals.reshape(-1),))
-# symbol_values = np.expand_dims(symbol_values, 0)
-# exp = tfq.layers.Expectation()(
-#     model_circuit, symbol_names=symbol_names, symbol_values=symbol_values, operators=operators)
-
-# ---- Train time ----
-control_params = tuple(theta.reshape(-1))
-
-
-circuits_input = tf.keras.Input(shape=(),
-                                # The circuit-tensor has dtype `tf.string`
-                                dtype=tf.string,
-                                name='circuits_input')
-
-commands_input = tf.keras.Input(shape=(Dp,),
-                                dtype=tf.dtypes.float32,
-                                name='commands_input')
-
 operators = [cirq.Z(af) for af in itertools.chain(*ancillas_fidelity)]
-expectation_layer = tfq.layers.ControlledPQC(model_circuit, operators=operators)
-expectation = expectation_layer([circuits_input, commands_input])
+symbol_names = tuple(np.concatenate((x.reshape(-1), theta.reshape(-1),)))
+symbol_values = np.concatenate((x_vals.reshape(-1), theta_vals.reshape(-1),))
+symbol_values = np.expand_dims(symbol_values, 0)
+exp = tfq.layers.Expectation()(
+    model_circuit, symbol_names=symbol_names, symbol_values=symbol_values, operators=operators)
 
-full_circuit = tfq.layers.AddCircuit()(circuits_input, append=model_circuit)
-model = tf.keras.Model(inputs=[circuits_input, commands_input], outputs=expectation)
-
-tf.keras.utils.plot_model(model, show_shapes=True, dpi=70)
-
-commands = np.array([[0], [0]], dtype=np.float32)
-
-optimizer = tf.keras.optimizers.Adam(learning_rate=0.05)
-loss = tf.keras.losses.MeanSquaredError()
-model.compile(optimizer=optimizer, loss=loss)
-history = model.fit(x=[tfq.convert_to_tensor([cirq.Circuit()]), commands, operators],
-                    y=y_vals,
-                    epochs=30,
-                    verbose=0)
+print(exp)
