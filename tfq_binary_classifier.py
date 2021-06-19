@@ -33,15 +33,15 @@ def generate_dataset(qubit, num_samples):
       source = "b"
     labels.append(label)
     q_data.append(cirq.Circuit(cirq.ry(-angle)(qubit), cirq.rx(-spread_x)(qubit)))
-  return tfq.convert_to_tensor(q_data), np.array(labels)
+  return q_data, np.array(labels)
 
-num_samples = 7
+num_samples = 200
 qubit = cirq.GridQubit(0, 0)
 q_data, labels = generate_dataset(qubit, num_samples)
 
 # Build the quantum model layer
 theta = sympy.Symbol('theta')
-q_model = cirq.Circuit(cirq.ry(theta)(qubit))
+q_model = cirq.Circuit([cirq.ry(theta)(qubit)])
 q_data_input = tf.keras.Input(
     shape=(), dtype=tf.dtypes.string)
 expectation = tfq.layers.PQC(q_model, cirq.Z(qubit))
@@ -56,4 +56,4 @@ model = tf.keras.Model(inputs=q_data_input, outputs=classifier_output)
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
               loss=tf.keras.losses.CategoricalCrossentropy())
 
-history = model.fit(x=q_data, y=labels, epochs=10, verbose=1)
+history = model.fit(x=tfq.convert_to_tensor(q_data), y=labels, epochs=50, verbose=1)
