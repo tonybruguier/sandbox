@@ -47,9 +47,10 @@ git_new_branch() {
 
 # Make sure you are using python3!
 
-./configure
+./configure.sh
 ./scripts/test_all.sh
 ./scripts/build_pip_package_test.sh
+bazel test -c opt --experimental_repo_remote_exec --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --cxxopt="-msse2" --cxxopt="-msse3" --cxxopt="-msse4" --notest_keep_going --test_output=errors //tensorflow_quantum/python/layers/high_level/...
 
 # -------- bazeltest --------
 ./configure
