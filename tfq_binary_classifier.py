@@ -44,7 +44,7 @@ theta = sympy.Symbol('theta')
 q_model = cirq.Circuit([cirq.ry(theta)(qubit)])
 q_data_input = tf.keras.Input(
     shape=(), dtype=tf.dtypes.string)
-expectation = tfq.layers.PQC(q_model, cirq.Z(qubit))
+expectation = tfq.layers.PQC([q_model, q_model], cirq.Z(qubit))
 expectation_output = expectation(q_data_input)
 
 # Attach the classical SoftMax classifier
