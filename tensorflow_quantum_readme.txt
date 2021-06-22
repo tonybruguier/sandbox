@@ -68,3 +68,6 @@ blaze() {
     --action_env=PYTHONPATH=${PYTHONPATH} \
     $2
 }
+
+# -------- format --------
+python3 -m yapf --style=google --in-place path/to/file.py
