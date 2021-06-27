@@ -60,7 +60,8 @@ class QuantumEmbedTest(tf.test.TestCase):
             for m in range(num_examples)
         ])
         data_out = np.array(
-            [[np.linalg.norm(data_in[m, :])] for m in range(num_examples)],
+            [[2.0 * (np.linalg.norm(data_in[m, :]) < 0.15) - 1.0]
+             for m in range(num_examples)],
             dtype=np.float32)
 
         history = model.fit(x=data_circuits, y=data_out, epochs=10)
