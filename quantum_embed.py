@@ -109,8 +109,12 @@ def _build_parametrized_unitary(qubits, depth_input, num_repetitions_input,
 
     # PennyLane StronglyEntanglingLayers:
     # https://sourcegraph.com/github.com/PennyLaneAI/pennylane/-/blob/pennylane/templates/layers/strongly_entangling.py
-    assert theta.shape == (num_repetitions_input, depth_input,
-                           num_unitary_layers, 3,)
+    assert theta.shape == (
+        num_repetitions_input,
+        depth_input,
+        num_unitary_layers,
+        3,
+    )
 
     assert len(qubits) == num_repetitions_input
     assert len(qubits[0]) == depth_input
