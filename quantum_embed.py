@@ -22,6 +22,7 @@ from tensorflow_quantum.python import util
 from tensorflow_quantum.python.layers.circuit_construction import elementary
 from tensorflow_quantum.python.layers.circuit_executors import expectation
 
+
 class QuantumEmbed(tf.keras.layers.Layer):
     """Quantum Embdedding Layer.
 
@@ -43,18 +44,30 @@ class QuantumEmbed(tf.keras.layers.Layer):
     https://www.youtube.com/watch?v=mNR-7OmilIo
     """
 
-    def __init__(self, qubits, **kwargs) -> None:
+    def __init__(self, qubits, num_repetitions_input, depth_input,
+                 num_unitary_layers, num_repetitions, **kwargs) -> None:
         """Instantiate this layer."""
         super().__init__(**kwargs)
 
-        model_circuits = [cirq.Circuit()]
-        self._model_circuits = [
-            util.convert_to_tensor([model_circuit])
-            for model_circuit in model_circuits
-        ]
+        assert len(qubits) == num_repetitions_input
+        assert len(qubits[0]) == depth_input
 
-        self._operators = util.convert_to_tensor([[cirq.Z(qubits[0])]])
-        self._executor = expectation.Expectation(backend='noiseless', differentiator=None)
+        self._theta = np.random.uniform(
+            0, 2 * np.pi, (num_repetitions_input, depth_input,
+                           num_unitary_layers, num_repetitions, 3))
+
+        self._model_circuits = []
+        for l in range(num_repetitions):
+            circuit = cirq.Circuit(
+                _build_parametrized_unitary(qubits, depth_input,
+                                            num_repetitions_input,
+                                            num_unitary_layers,
+                                            self._theta[:, :, :, l, :]))
+            self._model_circuits.append(util.convert_to_tensor([circuit]))
+
+        self._operators = util.convert_to_tensor([[cirq.Z(qubits[0][0])]])
+        self._executor = expectation.Expectation(backend='noiseless',
+                                                 differentiator=None)
         self._append_layer = elementary.AddCircuit()
 
     @property
@@ -71,8 +84,50 @@ class QuantumEmbed(tf.keras.layers.Layer):
         for model_circuit in self._model_circuits:
             tiled_up_model = tf.tile(model_circuit, [circuit_batch_dim])
             model_appended = self._append_layer(model_appended, append=inputs)
-            model_appended = self._append_layer(model_appended, append=tiled_up_model)
+            model_appended = self._append_layer(model_appended,
+                                                append=tiled_up_model)
 
         tiled_up_operators = tf.tile(self._operators, [circuit_batch_dim, 1])
         return self._executor(model_appended, operators=tiled_up_operators)
 
+
+def _build_parametrized_unitary(qubits, depth_input, num_repetitions_input,
+                                num_unitary_layers, theta):
+    # Circuit-centric quantum classifiers
+    # Maria Schuld, Alex Bocharov, Krysta Svore, Nathan Wiebe
+    # https://arxiv.org/abs/1804.00633
+
+    # PennyLane StronglyEntanglingLayers:
+    # https://sourcegraph.com/github.com/PennyLaneAI/pennylane/-/blob/pennylane/templates/layers/strongly_entangling.py
+    assert theta.shape[0] == num_repetitions_input
+    assert theta.shape[1] == depth_input
+    assert theta.shape[2] == num_unitary_layers
+    assert theta.shape[3] == 3
+
+    assert len(qubits) == num_repetitions_input
+    assert len(qubits[0]) == depth_input
+
+    num_qubits = depth_input * num_repetitions_input
+
+    if num_qubits > 1:
+        ranges = [(k % (num_qubits - 1)) + 1 for k in range(num_unitary_layers)]
+
+    for k in range(num_unitary_layers):
+        for i in range(num_repetitions_input):
+            for j in range(depth_input):
+                yield cirq.Rz(rads=theta[i][j][k][0]).on(qubits[i][j])
+                yield cirq.Ry(rads=theta[i][j][k][1]).on(qubits[i][j])
+                yield cirq.Rz(rads=theta[i][j][k][2]).on(qubits[i][j])
+
+        if num_qubits > 1:
+            for ij1 in range(num_qubits):
+                ij2 = (ij1 + ranges[k]) % num_qubits
+                assert ij1 != ij2
+
+                i1 = ij1 % num_repetitions_input
+                j1 = ij1 // num_repetitions_input
+
+                i2 = ij2 % num_repetitions_input
+                j2 = ij2 // num_repetitions_input
+
+                yield cirq.CNOT(qubits[i1][j1], qubits[i2][j2])
