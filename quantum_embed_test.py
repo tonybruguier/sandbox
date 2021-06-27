@@ -33,12 +33,14 @@ class QuantumEmbedTest(tf.test.TestCase):
         num_unitary_layers = 7
         num_repetitions = 11
 
-        qubits = [[cirq.GridQubit(i, j) for j in range(depth_input)] for i in range(num_repetitions_input)]
+        qubits = [[cirq.GridQubit(i, j)
+                   for j in range(depth_input)]
+                  for i in range(num_repetitions_input)]
 
         quantum_datum = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
         qe = quantum_embed.QuantumEmbed(qubits, num_repetitions_input,
-                                        depth_input,
-                                        num_unitary_layers, num_repetitions)
+                                        depth_input, num_unitary_layers,
+                                        num_repetitions)
         outputs = qe(quantum_datum)
 
         model = tf.keras.Model(inputs=quantum_datum, outputs=outputs)
@@ -47,9 +49,16 @@ class QuantumEmbedTest(tf.test.TestCase):
 
         data_out = np.array([[1], [-1]], dtype=np.float32)
 
-        data_circuits = util.convert_to_tensor(
-            [cirq.Circuit(cirq.X(qubits[0][0])**0.5),
-             cirq.Circuit()])
+        data_circuits = util.convert_to_tensor([
+            cirq.Circuit(
+                quantum_embed._build_param_rotator(
+                    qubits, depth_input, num_repetitions_input,
+                    np.asarray([0.123] * depth_input))),
+            cirq.Circuit(
+                quantum_embed._build_param_rotator(
+                    qubits, depth_input, num_repetitions_input,
+                    np.asarray([0.456] * depth_input))),
+        ])
 
         history = model.fit(x=data_circuits, y=data_out, epochs=10)
         self.assertAllClose(history.history['loss'][-1], 1.0, atol=1e-1)

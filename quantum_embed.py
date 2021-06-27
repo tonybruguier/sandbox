@@ -91,6 +91,16 @@ class QuantumEmbed(tf.keras.layers.Layer):
         return self._executor(model_appended, operators=tiled_up_operators)
 
 
+def _build_param_rotator(qubits, depth_input, num_repetitions_input, x):
+    assert x.shape == (depth_input,)
+    assert len(qubits) == num_repetitions_input
+    assert len(qubits[0]) == depth_input
+
+    for i in range(num_repetitions_input):
+        for j in range(depth_input):
+            yield cirq.Rx(rads=x[j]).on(qubits[i][j])
+
+
 def _build_parametrized_unitary(qubits, depth_input, num_repetitions_input,
                                 num_unitary_layers, theta):
     # Circuit-centric quantum classifiers
@@ -99,10 +109,8 @@ def _build_parametrized_unitary(qubits, depth_input, num_repetitions_input,
 
     # PennyLane StronglyEntanglingLayers:
     # https://sourcegraph.com/github.com/PennyLaneAI/pennylane/-/blob/pennylane/templates/layers/strongly_entangling.py
-    assert theta.shape[0] == num_repetitions_input
-    assert theta.shape[1] == depth_input
-    assert theta.shape[2] == num_unitary_layers
-    assert theta.shape[3] == 3
+    assert theta.shape == (num_repetitions_input, depth_input,
+                           num_unitary_layers, 3,)
 
     assert len(qubits) == num_repetitions_input
     assert len(qubits[0]) == depth_input
