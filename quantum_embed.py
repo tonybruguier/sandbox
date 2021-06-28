@@ -84,18 +84,18 @@ class QuantumEmbed(tf.keras.layers.Layer):
         """Keras call function."""
         num_examples = tf.gather(tf.shape(data_in), 0)
 
-        def build_param_rotator(m):
+        def build_param_rotator(data_slice):
             circuit = cirq.Circuit(
                 _build_param_rotator(
                     self._qubits,
                     self._depth_input,
                     self._num_repetitions_input,
-                    data_in[m, :]
+                    data_slice
                 ))
             return util.convert_to_tensor([circuit])[0]
 
         data_circuits = tf.map_fn(build_param_rotator,
-                                  tf.range(num_examples),
+                                  data_in,
                                   fn_output_signature=tf.string)
 
         model_appended = tf.tile(util.convert_to_tensor([cirq.Circuit()]),
