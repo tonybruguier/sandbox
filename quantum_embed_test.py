@@ -17,7 +17,6 @@ import cirq
 import numpy as np
 
 import tensorflow as tf
-from tensorflow_quantum.python import util
 
 import quantum_embed
 
@@ -38,7 +37,7 @@ class QuantumEmbedTest(tf.test.TestCase):
                    for j in range(depth_input)]
                   for i in range(num_repetitions_input)]
 
-        quantum_datum = tf.keras.Input(shape=(), dtype=tf.dtypes.string)
+        quantum_datum = tf.keras.Input(shape=(depth_input, ), dtype=tf.dtypes.float32)
         qe = quantum_embed.QuantumEmbed(qubits, num_repetitions_input,
                                         depth_input, num_unitary_layers,
                                         num_repetitions)
@@ -52,19 +51,12 @@ class QuantumEmbedTest(tf.test.TestCase):
             num_examples,
             depth_input,
         ))
-        data_circuits = util.convert_to_tensor([
-            cirq.Circuit(
-                quantum_embed._build_param_rotator(qubits, depth_input,
-                                                   num_repetitions_input,
-                                                   data_in[m, :]))
-            for m in range(num_examples)
-        ])
         data_out = np.array(
             [[2.0 * (np.linalg.norm(data_in[m, :]) < 0.15) - 1.0]
              for m in range(num_examples)],
             dtype=np.float32)
 
-        history = model.fit(x=data_circuits, y=data_out, epochs=10)
+        history = model.fit(x=data_in, y=data_out, epochs=10)
         self.assertAllClose(history.history['loss'][-1], 1.0, atol=1e-1)
 
 

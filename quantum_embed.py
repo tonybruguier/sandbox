@@ -51,6 +51,7 @@ class QuantumEmbed(tf.keras.layers.Layer):
 
         assert len(qubits) == num_repetitions_input
         assert len(qubits[0]) == depth_input
+        self._qubits = qubits
 
         self._theta = np.random.uniform(
             0, 2 * np.pi, (num_repetitions_input, depth_input,
@@ -65,6 +66,11 @@ class QuantumEmbed(tf.keras.layers.Layer):
                                             self._theta[:, :, :, l, :]))
             self._model_circuits.append(util.convert_to_tensor([circuit]))
 
+        self._num_repetitions_input = num_repetitions_input
+        self._depth_input = depth_input
+        self._num_unitary_layers = num_unitary_layers
+        self._num_repetitions = num_repetitions
+
         self._operators = util.convert_to_tensor([[cirq.Z(qubits[0][0])]])
         self._executor = expectation.Expectation(backend='noiseless',
                                                  differentiator=None)
@@ -74,20 +80,34 @@ class QuantumEmbed(tf.keras.layers.Layer):
     def symbols(self):
         pass
 
-    def call(self, inputs):
+    def call(self, data_in):
         """Keras call function."""
+        num_examples = tf.gather(tf.shape(data_in), 0)
 
-        circuit_batch_dim = tf.gather(tf.shape(inputs), 0)
+        def build_param_rotator(m):
+            circuit = cirq.Circuit(
+                _build_param_rotator(
+                    self._qubits,
+                    self._depth_input,
+                    self._num_repetitions_input,
+                    data_in[m, :]
+                ))
+            return util.convert_to_tensor([circuit])[0]
+
+        data_circuits = tf.map_fn(build_param_rotator,
+                                  tf.range(num_examples),
+                                  fn_output_signature=tf.string)
 
         model_appended = tf.tile(util.convert_to_tensor([cirq.Circuit()]),
-                                 [circuit_batch_dim])
+                                 [num_examples])
         for model_circuit in self._model_circuits:
-            tiled_up_model = tf.tile(model_circuit, [circuit_batch_dim])
-            model_appended = self._append_layer(model_appended, append=inputs)
+            tiled_up_model = tf.tile(model_circuit, [num_examples])
+            model_appended = self._append_layer(model_appended,
+                                                append=data_circuits)
             model_appended = self._append_layer(model_appended,
                                                 append=tiled_up_model)
 
-        tiled_up_operators = tf.tile(self._operators, [circuit_batch_dim, 1])
+        tiled_up_operators = tf.tile(self._operators, [num_examples, 1])
         return self._executor(model_appended, operators=tiled_up_operators)
 
 
