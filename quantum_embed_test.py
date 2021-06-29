@@ -45,7 +45,7 @@ class QuantumEmbedTest(tf.test.TestCase):
         outputs = qe(quantum_datum)
 
         model = tf.keras.Model(inputs=quantum_datum, outputs=outputs)
-        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.03),
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
                       loss=tf.keras.losses.mean_squared_error)
 
         data_in = np.random.normal(0.0, 0.1, (
@@ -61,8 +61,8 @@ class QuantumEmbedTest(tf.test.TestCase):
              for m in range(num_examples)],
             dtype=np.float32)
 
-        history = model.fit(x=data_circuits, y=data_out, epochs=10)
-        self.assertAllClose(history.history['loss'][-1], 1.0, atol=1e-1)
+        history = model.fit(x=data_circuits, y=data_out, epochs=20)
+        assert history.history['loss'][-1] < history.history['loss'][0] * 0.5
 
 
 if __name__ == "__main__":
