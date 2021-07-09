@@ -1,0 +1,9 @@
+Add @profile
+kernprof -l quantum_embed.py
+python3 -m line_profiler quantum_embed.py.lprof
+
+
+tf.profiler.experimental.start('/tmp/profile', options=None)
+tf.profiler.experimental.stop()
+
+tensorboard --logdir /tmp/profile/ --load_fast false --port 8080
