@@ -22,9 +22,10 @@ python3 -m pip install pydot graphviz pydot_ng pydotplus qutip
 sudo apt-get install graphviz
 
 # -------- bazel --------
+cd /tmp
 sudo apt-get remove bazel
-wget https://github.com/bazelbuild/bazel/releases/download/3.1.0/bazel_3.1.0-linux-x86_64.deb
-sudo dpkg -i bazel_3.1.0-linux-x86_64.deb
+wget https://github.com/bazelbuild/bazel/releases/download/3.7.2/bazel_3.7.2-linux-x86_64.deb
+sudo dpkg -i bazel_3.7.2-linux-x86_64.deb
 sudo apt-mark hold bazel
 bazel --version
 
@@ -66,8 +67,32 @@ blaze() {
     --notest_keep_going \
     --test_output=errors \
     --action_env=PYTHONPATH=${PYTHONPATH} \
+    --keep_going \
     $2
 }
 
 # -------- format --------
 python3 -m yapf --style=google --in-place path/to/file.py
+
+# -------- Serialized Protos --------
+python3 -m pip install protobuf~=3.13.0
+python3 -m pip install grpcio-tools~=1.26.0
+python3 -m pip install mypy-protobuf==1.10
+
+
+
+# -------- running test --------
+GIT_BASE_DIR="/home/ubuntu/Dropbox/AWS_EC2_shared/git"
+CIRQ_MASTER_PATHS=""
+for cirq_comp in `ls -d ${GIT_BASE_DIR}/cirq_master/cirq-* | awk -F"/" '{print $8}'`
+do
+  CIRQ_MASTER_PATHS="${CIRQ_MASTER_PATHS}:${GIT_BASE_DIR}/cirq_bump_proto_version/${cirq_comp}"
+done
+export PYTHONPATH=`echo ${CIRQ_MASTER_PATHS} | cut -c2-`
+
+blaze test --test_filter=SerializerTest.test_deserialize_projectorsum_simple0 //tensorflow_quantum/core/serialize:serializer_test
+blaze test //tensorflow_quantum/core/serialize:serializer_test
+
+blaze test //tensorflow_quantum/core/serialize:op_serializer_test
+
+blaze test //tensorflow_quantum/core/ops:cirq_ops_test
