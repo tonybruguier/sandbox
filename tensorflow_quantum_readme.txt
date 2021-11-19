@@ -96,3 +96,16 @@ blaze test //tensorflow_quantum/core/serialize:serializer_test
 blaze test //tensorflow_quantum/core/serialize:op_serializer_test
 
 blaze test //tensorflow_quantum/core/ops:cirq_ops_test
+blaze test //tensorflow_quantum/python:util_test
+
+
+blaze test \
+  //tensorflow_quantum/core/ops:tfq_utility_ops_test \
+  //tensorflow_quantum/core/serialize:serializer_test \
+  //tensorflow_quantum/python:util_test \
+  //tensorflow_quantum/python/layers/circuit_construction:elementary_test \
+  //tensorflow_quantum/python/layers/circuit_executors:input_checks_test
+
+blaze test //tensorflow_quantum/core/ops/math_ops/...
+blaze test //tensorflow_quantum/core/ops/noise/...
+blaze test //tensorflow_quantum/core/ops/...
