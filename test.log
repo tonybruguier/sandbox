@@ -1,0 +1,174 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //tensorflow_quantum/core/ops:tfq_simulate_ops_test
+-----------------------------------------------------------------------------
+2021-11-20 03:27:22.186113: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-11-20 03:27:22.188101: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+Running tests under Python 3.8.10: /usr/bin/python3
+[ RUN      ] InputTypesTest.test_session
+[  SKIPPED ] InputTypesTest.test_session
+[ RUN      ] InputTypesTest.test_symbol_values_type0 (symbol_type=tf.float32)
+2021-11-20 03:27:29.272550: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory
+2021-11-20 03:27:29.272619: W tensorflow/stream_executor/cuda/cuda_driver.cc:326] failed call to cuInit: UNKNOWN ERROR (303)
+2021-11-20 03:27:29.272654: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (ip-172-31-28-135): /proc/driver/nvidia/version does not exist
+2021-11-20 03:27:29.273007: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-11-20 03:27:29.288900: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=terms {
+  coefficient_real: 1
+  paulis {
+    qubit_id: "0"
+    pauli_type: "X"
+  }
+}
+
+INFO:tensorflow:time(__main__.InputTypesTest.test_symbol_values_type0 (symbol_type=tf.float32)): 0.02s
+I1120 03:27:29.290172 140273957058368 test_util.py:2102] time(__main__.InputTypesTest.test_symbol_values_type0 (symbol_type=tf.float32)): 0.02s
+[       OK ] InputTypesTest.test_symbol_values_type0 (symbol_type=tf.float32)
+[ RUN      ] InputTypesTest.test_symbol_values_type1 (symbol_type=tf.float64)
+2021-11-20 03:27:29.293290: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=terms {
+  coefficient_real: 1
+  paulis {
+    qubit_id: "0"
+    pauli_type: "X"
+  }
+}
+
+INFO:tensorflow:time(__main__.InputTypesTest.test_symbol_values_type1 (symbol_type=tf.float64)): 0.0s
+I1120 03:27:29.294574 140273957058368 test_util.py:2102] time(__main__.InputTypesTest.test_symbol_values_type1 (symbol_type=tf.float64)): 0.0s
+[       OK ] InputTypesTest.test_symbol_values_type1 (symbol_type=tf.float64)
+[ RUN      ] InputTypesTest.test_symbol_values_type2 (symbol_type=tf.int32)
+2021-11-20 03:27:29.297501: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=terms {
+  coefficient_real: 1
+  paulis {
+    qubit_id: "0"
+    pauli_type: "X"
+  }
+}
+
+INFO:tensorflow:time(__main__.InputTypesTest.test_symbol_values_type2 (symbol_type=tf.int32)): 0.0s
+I1120 03:27:29.298754 140273957058368 test_util.py:2102] time(__main__.InputTypesTest.test_symbol_values_type2 (symbol_type=tf.int32)): 0.0s
+[       OK ] InputTypesTest.test_symbol_values_type2 (symbol_type=tf.int32)
+[ RUN      ] InputTypesTest.test_symbol_values_type3 (symbol_type=tf.int64)
+2021-11-20 03:27:29.301521: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=terms {
+  coefficient_real: 1
+  paulis {
+    qubit_id: "0"
+    pauli_type: "X"
+  }
+}
+
+INFO:tensorflow:time(__main__.InputTypesTest.test_symbol_values_type3 (symbol_type=tf.int64)): 0.01s
+I1120 03:27:29.313405 140273957058368 test_util.py:2102] time(__main__.InputTypesTest.test_symbol_values_type3 (symbol_type=tf.int64)): 0.01s
+[       OK ] InputTypesTest.test_symbol_values_type3 (symbol_type=tf.int64)
+[ RUN      ] InputTypesTest.test_symbol_values_type4 (symbol_type=tf.complex64)
+2021-11-20 03:27:29.316476: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=terms {
+  coefficient_real: 1
+  paulis {
+    qubit_id: "0"
+    pauli_type: "X"
+  }
+}
+
+INFO:tensorflow:time(__main__.InputTypesTest.test_symbol_values_type4 (symbol_type=tf.complex64)): 0.0s
+I1120 03:27:29.317679 140273957058368 test_util.py:2102] time(__main__.InputTypesTest.test_symbol_values_type4 (symbol_type=tf.complex64)): 0.0s
+[       OK ] InputTypesTest.test_symbol_values_type4 (symbol_type=tf.complex64)
+[ RUN      ] SimulateExpectationTest.test_session
+[  SKIPPED ] SimulateExpectationTest.test_session
+[ RUN      ] SimulateExpectationTest.test_simulate_expectation_inputs
+2021-11-20 03:27:29.969298: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:72 : Invalid argument: programs must be rank 1. Got rank 2.
+2021-11-20 03:27:30.264438: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:76 : Invalid argument: symbol_names must be rank 1. Got rank 2.
+2021-11-20 03:27:30.571562: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:76 : Invalid argument: symbol_values must be rank 2. Got rank 3.
+2021-11-20 03:27:30.884443: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:76 : Invalid argument: symbol_values must be rank 2. Got rank 1.
+2021-11-20 03:27:31.216282: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:72 : Invalid argument: pauli_sums must be rank 2. Got rank 1.
+2021-11-20 03:27:31.449319: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:72 : Invalid argument: pauli_sums must be rank 2. Got rank 3.
+[libprotobuf ERROR external/com_google_protobuf/src/google/protobuf/text_format.cc:324] Error parsing text-format tfq.proto.Program: 1:5: Message type "tfq.proto.Program" has no field named "junk".
+2021-11-20 03:27:31.455277: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at parse_context.cc:81 : Invalid argument: Unparseable proto: junk
+2021-11-20 03:27:31.688626: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:103 : Invalid argument: Could not find symbol in parameter map: alpha
+2021-11-20 03:27:31.993570: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at parse_context.cc:190 : Invalid argument: Found a Pauli sum operating on qubits not found in circuit.
+[libprotobuf ERROR external/com_google_protobuf/src/google/protobuf/text_format.cc:324] Error parsing text-format tfq.proto.PauliSum: 1:5: Message type "tfq.proto.PauliSum" has no field named "junk".
+2021-11-20 03:27:32.204230: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at parse_context.cc:275 : Invalid argument: Unparseable proto: junk
+2021-11-20 03:27:32.207658: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=
+2021-11-20 03:27:32.209856: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=
+2021-11-20 03:27:32.211770: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=
+2021-11-20 03:27:32.213625: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=
+2021-11-20 03:27:32.215417: I ./tensorflow_quantum/core/src/util_qsim.h:146] TONYBOOM p_sum=
+2021-11-20 03:27:32.662286: W tensorflow/core/framework/op_kernel.cc:1744] OP_REQUIRES failed at cast_op.cc:121 : Unimplemented: Cast string to float is not supported
+2021-11-20 03:27:33.532937: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:72 : Invalid argument: Number of circuits and PauliSums do not match. Got 5 circuits and 2 paulisums.
+2021-11-20 03:27:33.730691: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_expectation_op.cc:103 : Invalid argument: Could not parse gate id: DP. This is likely because a cirq.Channel was used in an op that does not support them.
+INFO:tensorflow:time(__main__.SimulateExpectationTest.test_simulate_expectation_inputs): 4.43s
+I1120 03:27:33.747531 140273957058368 test_util.py:2102] time(__main__.SimulateExpectationTest.test_simulate_expectation_inputs): 4.43s
+[       OK ] SimulateExpectationTest.test_simulate_expectation_inputs
+[ RUN      ] SimulateSampledExpectationTest.test_session
+[  SKIPPED ] SimulateSampledExpectationTest.test_session
+[ RUN      ] SimulateSampledExpectationTest.test_simulate_sampled_expectation_inputs
+2021-11-20 03:27:34.023404: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:75 : Invalid argument: programs must be rank 1. Got rank 2.
+2021-11-20 03:27:34.327185: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:79 : Invalid argument: symbol_names must be rank 1. Got rank 2.
+2021-11-20 03:27:34.622355: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:79 : Invalid argument: symbol_values must be rank 2. Got rank 3.
+2021-11-20 03:27:34.805667: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:79 : Invalid argument: symbol_values must be rank 2. Got rank 1.
+2021-11-20 03:27:35.036636: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:75 : Invalid argument: pauli_sums must be rank 2. Got rank 1.
+2021-11-20 03:27:35.223946: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:75 : Invalid argument: pauli_sums must be rank 2. Got rank 3.
+2021-11-20 03:27:35.395340: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:88 : Invalid argument: num_samples must be rank 2. Got rank 3.
+2021-11-20 03:27:35.543787: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:88 : Invalid argument: num_samples must be rank 2. Got rank 1.
+[libprotobuf ERROR external/com_google_protobuf/src/google/protobuf/text_format.cc:324] Error parsing text-format tfq.proto.Program: 1:5: Message type "tfq.proto.Program" has no field named "junk".
+2021-11-20 03:27:35.550796: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at parse_context.cc:81 : Invalid argument: Unparseable proto: junk
+2021-11-20 03:27:35.722655: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:122 : Invalid argument: Could not find symbol in parameter map: alpha
+2021-11-20 03:27:35.965829: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at parse_context.cc:190 : Invalid argument: Found a Pauli sum operating on qubits not found in circuit.
+[libprotobuf ERROR external/com_google_protobuf/src/google/protobuf/text_format.cc:324] Error parsing text-format tfq.proto.PauliSum: 1:5: Message type "tfq.proto.PauliSum" has no field named "junk".
+2021-11-20 03:27:36.175444: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at parse_context.cc:275 : Invalid argument: Unparseable proto: junk
+2021-11-20 03:27:36.556656: W tensorflow/core/framework/op_kernel.cc:1744] OP_REQUIRES failed at cast_op.cc:121 : Unimplemented: Cast string to float is not supported
+2021-11-20 03:27:37.039639: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:75 : Invalid argument: Number of circuits and PauliSums do not match. Got 1 circuits and 5 paulisums.
+2021-11-20 03:27:37.518781: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:88 : Invalid argument: Each element of num_samples must be greater than 0.
+2021-11-20 03:27:37.847337: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_sampled_expectation_op.cc:122 : Invalid argument: Could not parse gate id: DP. This is likely because a cirq.Channel was used in an op that does not support them.
+INFO:tensorflow:time(__main__.SimulateSampledExpectationTest.test_simulate_sampled_expectation_inputs): 4.1s
+I1120 03:27:37.864109 140273957058368 test_util.py:2102] time(__main__.SimulateSampledExpectationTest.test_simulate_sampled_expectation_inputs): 4.1s
+[       OK ] SimulateSampledExpectationTest.test_simulate_sampled_expectation_inputs
+[ RUN      ] SimulateSamplesTest.test_sampling_output_padding0 (all_n_qubits=[2, 3], n_samples=10)
+INFO:tensorflow:time(__main__.SimulateSamplesTest.test_sampling_output_padding0 (all_n_qubits=[2, 3], n_samples=10)): 0.0s
+I1120 03:27:37.873975 140273957058368 test_util.py:2102] time(__main__.SimulateSamplesTest.test_sampling_output_padding0 (all_n_qubits=[2, 3], n_samples=10)): 0.0s
+[       OK ] SimulateSamplesTest.test_sampling_output_padding0 (all_n_qubits=[2, 3], n_samples=10)
+[ RUN      ] SimulateSamplesTest.test_sampling_output_padding1 (all_n_qubits=[1, 5, 8], n_samples=10)
+INFO:tensorflow:time(__main__.SimulateSamplesTest.test_sampling_output_padding1 (all_n_qubits=[1, 5, 8], n_samples=10)): 0.01s
+I1120 03:27:37.898692 140273957058368 test_util.py:2102] time(__main__.SimulateSamplesTest.test_sampling_output_padding1 (all_n_qubits=[1, 5, 8], n_samples=10)): 0.01s
+[       OK ] SimulateSamplesTest.test_sampling_output_padding1 (all_n_qubits=[1, 5, 8], n_samples=10)
+[ RUN      ] SimulateSamplesTest.test_session
+[  SKIPPED ] SimulateSamplesTest.test_session
+[ RUN      ] SimulateSamplesTest.test_simulate_samples_inputs
+2021-11-20 03:27:38.334607: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_samples_op.cc:60 : Invalid argument: programs must be rank 1. Got rank 2.
+2021-11-20 03:27:38.636074: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_samples_op.cc:65 : Invalid argument: symbol_names must be rank 1. Got rank 2.
+2021-11-20 03:27:38.956243: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_samples_op.cc:65 : Invalid argument: symbol_values must be rank 2. Got rank 3.
+2021-11-20 03:27:39.182931: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_samples_op.cc:65 : Invalid argument: symbol_values must be rank 2. Got rank 1.
+2021-11-20 03:27:39.414253: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_samples_op.cc:73 : Invalid argument: num_samples must be rank 1. Got rank 2.
+[libprotobuf ERROR external/com_google_protobuf/src/google/protobuf/text_format.cc:324] Error parsing text-format tfq.proto.Program: 1:5: Message type "tfq.proto.Program" has no field named "junk".
+2021-11-20 03:27:39.416119: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at parse_context.cc:81 : Invalid argument: Unparseable proto: junk
+2021-11-20 03:27:39.738152: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_samples_op.cc:94 : Invalid argument: Could not find symbol in parameter map: alpha
+2021-11-20 03:27:40.388326: W tensorflow/core/framework/op_kernel.cc:1744] OP_REQUIRES failed at cast_op.cc:121 : Unimplemented: Cast string to float is not supported
+2021-11-20 03:27:41.372256: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_samples_op.cc:94 : Invalid argument: Could not parse gate id: DP. This is likely because a cirq.Channel was used in an op that does not support them.
+INFO:tensorflow:time(__main__.SimulateSamplesTest.test_simulate_samples_inputs): 3.49s
+I1120 03:27:41.384859 140273957058368 test_util.py:2102] time(__main__.SimulateSamplesTest.test_simulate_samples_inputs): 3.49s
+[       OK ] SimulateSamplesTest.test_simulate_samples_inputs
+[ RUN      ] SimulateStateTest.test_session
+[  SKIPPED ] SimulateStateTest.test_session
+[ RUN      ] SimulateStateTest.test_simulate_state_inputs
+2021-11-20 03:27:41.696273: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_state_op.cc:55 : Invalid argument: programs must be rank 1. Got rank 2.
+2021-11-20 03:27:41.872482: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_state_op.cc:60 : Invalid argument: symbol_names must be rank 1. Got rank 2.
+2021-11-20 03:27:42.072387: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_state_op.cc:60 : Invalid argument: symbol_values must be rank 2. Got rank 3.
+2021-11-20 03:27:42.266598: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_state_op.cc:60 : Invalid argument: symbol_values must be rank 2. Got rank 1.
+[libprotobuf ERROR external/com_google_protobuf/src/google/protobuf/text_format.cc:324] Error parsing text-format tfq.proto.Program: 1:5: Message type "tfq.proto.Program" has no field named "junk".
+2021-11-20 03:27:42.272476: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at parse_context.cc:81 : Invalid argument: Unparseable proto: junk
+2021-11-20 03:27:42.519411: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_state_op.cc:86 : Invalid argument: Could not find symbol in parameter map: alpha
+2021-11-20 03:27:43.038572: W tensorflow/core/framework/op_kernel.cc:1744] OP_REQUIRES failed at cast_op.cc:121 : Unimplemented: Cast string to float is not supported
+2021-11-20 03:27:43.753416: W tensorflow/core/framework/op_kernel.cc:1767] OP_REQUIRES failed at tfq_simulate_state_op.cc:86 : Invalid argument: Could not parse gate id: DP. This is likely because a cirq.Channel was used in an op that does not support them.
+INFO:tensorflow:time(__main__.SimulateStateTest.test_simulate_state_inputs): 2.36s
+I1120 03:27:43.755292 140273957058368 test_util.py:2102] time(__main__.SimulateStateTest.test_simulate_state_inputs): 2.36s
+[       OK ] SimulateStateTest.test_simulate_state_inputs
+[ RUN      ] SimulateStateTest.test_simulate_state_output_padding0 (all_n_qubits=[2, 3])
+INFO:tensorflow:time(__main__.SimulateStateTest.test_simulate_state_output_padding0 (all_n_qubits=[2, 3])): 0.07s
+I1120 03:27:43.828691 140273957058368 test_util.py:2102] time(__main__.SimulateStateTest.test_simulate_state_output_padding0 (all_n_qubits=[2, 3])): 0.07s
+[       OK ] SimulateStateTest.test_simulate_state_output_padding0 (all_n_qubits=[2, 3])
+[ RUN      ] SimulateStateTest.test_simulate_state_output_padding1 (all_n_qubits=[1, 5, 8])
+INFO:tensorflow:time(__main__.SimulateStateTest.test_simulate_state_output_padding1 (all_n_qubits=[1, 5, 8])): 0.14s
+I1120 03:27:43.977363 140273957058368 test_util.py:2102] time(__main__.SimulateStateTest.test_simulate_state_output_padding1 (all_n_qubits=[1, 5, 8])): 0.14s
+[       OK ] SimulateStateTest.test_simulate_state_output_padding1 (all_n_qubits=[1, 5, 8])
+----------------------------------------------------------------------
+Ran 18 tests in 14.731s
+
+OK (skipped=5)
