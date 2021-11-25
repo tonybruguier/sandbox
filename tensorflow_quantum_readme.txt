@@ -68,7 +68,7 @@ blaze() {
     --test_output=errors \
     --action_env=PYTHONPATH=${PYTHONPATH} \
     --keep_going \
-    $2
+    "${@:2}"
 }
 
 # -------- format --------
@@ -112,3 +112,4 @@ blaze test //tensorflow_quantum/core/ops/...
 blaze test //tensorflow_quantum/core/ops:tfq_unitary_op_test
 blaze test //tensorflow_quantum/core/ops:tfq_simulate_ops_test
 blaze test //tensorflow_quantum/core/ops/noise:noisy_expectation_op_test
+blaze test //tensorflow_quantum/core/ops/noise:noisy_expectation_op_test --test_filter=test_simulate_consistency2
