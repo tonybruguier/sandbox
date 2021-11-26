@@ -112,4 +112,5 @@ blaze test //tensorflow_quantum/core/ops/...
 blaze test //tensorflow_quantum/core/ops:tfq_unitary_op_test
 blaze test //tensorflow_quantum/core/ops:tfq_simulate_ops_test
 blaze test //tensorflow_quantum/core/ops/noise:noisy_expectation_op_test
-blaze test //tensorflow_quantum/core/ops/noise:noisy_expectation_op_test --test_filter=test_simulate_consistency2
+blaze test //tensorflow_quantum/core/ops:circuit_execution_ops_test
+blaze test //tensorflow_quantum/core/ops:cirq_ops_test
