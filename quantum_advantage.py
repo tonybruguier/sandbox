@@ -90,6 +90,10 @@ def create_randomized_sweeps(
         all_sweeps.append(current_sweep)
     return all_sweeps
 
+rand_source = np.random.RandomState(20160913)
+n_paulis = 3
+n = 3
+n_shots = 11
 n_repeats = 13
 classical_shadows = True
 
