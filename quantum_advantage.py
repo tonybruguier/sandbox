@@ -108,19 +108,17 @@ else:  # not classical_shadows
     qubit_order = [f"q{i}" for i in range(2 * n)]
 
 paulis = []
-for pauli_num in rand_source.choice(range(4 ** n), n_paulis, replace=False):
+for pauli_num in rand_source.choice(range(3 ** n), n_paulis, replace=False):
     pauli = ''
     for _ in range(n):
-        base4 = pauli_num % 4
-        if base4 == 0:
-            pauli += 'I'
-        elif base4 == 1:
+        base3 = pauli_num % 3
+        if base3 == 0:
             pauli += 'X'
-        elif base4 == 2:
+        elif base3 == 1:
             pauli += 'Y'
         else:
             pauli += 'Z'
-        pauli_num = (pauli_num - base4) // 4
+        pauli_num = (pauli_num - base3) // 3
     paulis.append(pauli)
 
     circuit, sweeps = build_circuit(
