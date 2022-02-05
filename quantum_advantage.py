@@ -107,6 +107,7 @@ if classical_shadows:
 else:  # not classical_shadows
     qubit_order = [f"q{i}" for i in range(2 * n)]
 
+paulis = []
 for pauli_num in rand_source.choice(range(4 ** n), n_paulis, replace=False):
     pauli = ''
     for _ in range(n):
@@ -120,7 +121,7 @@ for pauli_num in rand_source.choice(range(4 ** n), n_paulis, replace=False):
         else:
             pauli += 'Z'
         pauli_num = (pauli_num - base4) // 4
-    print(pauli)
+    paulis.append(pauli)
 
     circuit, sweeps = build_circuit(
         system_pairs,
@@ -219,7 +220,6 @@ for pauli_idx in range(n_paulis):
     # Same Pauli
     for i in range(n_repeats):
         j = _sample_different(n_repeats, i)
-
         x1.append(all_results[pauli_idx][i].astype(float))
         x2.append(all_results[pauli_idx][j].astype(float))
         y.append([1.0, 0.0])
