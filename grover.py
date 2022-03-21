@@ -1,7 +1,9 @@
 import cirq
 import cirq.contrib.bayesian_network as ccb
+import numpy as np
 
 def diffuser(qubits):
+    #yield cirq.X(qubits[0])
     for q in qubits:
         yield cirq.H(q)
         yield cirq.X(q)
@@ -11,6 +13,7 @@ def diffuser(qubits):
     for q in qubits:
         yield cirq.X(q)
         yield cirq.H(q)
+    yield -1.0 * cirq.I(qubits[0])
 
 def oracle(qubits):
     # # This Oracle should favor |11111>
@@ -19,6 +22,17 @@ def oracle(qubits):
     # This Oracle should favor |???1?>
     yield cirq.Z(qubits[3])
 
+def print_state_vector(circuit):
+    phi = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()
+
+    print('-----')
+    print('01234')
+    print('-----')
+    for i in range(2**5):
+        print("{i:05b}\tp={p:.3f}\t({real:.6f},\t{imag:.6f})".format(
+          i=i, p=abs(phi[i])**2, real=phi[i].real, imag=phi[i].imag))
+    print("\t\t({real:.6f},\t{imag:.6f})".format(
+        real=np.mean(phi).real, imag=np.mean(phi).imag))
 
 qubits = cirq.LineQubit.range(5)
 circuit = cirq.Circuit()
@@ -31,21 +45,34 @@ circuit += ccb.BayesianNetworkGate(
     [(('q3'), ('q0', 'q1',), [0.01, 0.02, 0.03, 0.04]),
      (('q4'), ('q2', 'q3',), [0.40, 0.10, 0.70, 0.90])]).on(*qubits)
 
+print_state_vector(circuit)
+
 # Contrary to classical algorithms, adding extra iterations will worsen the results.
 for _ in range(1):
     circuit += oracle(qubits)
+    print_state_vector(circuit)
     circuit += diffuser(qubits)
+    print_state_vector(circuit)
 
-phi = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()
-probs = abs(phi) ** 2
 
+#print(cirq.unitary(cirq.Circuit(diffuser(qubits))))
+
+# for shift in range(5):
+#     total_prob = 0.0
+#     for i, prob in enumerate(probs):
+#         if (i >> ( 5 - 1 - shift)) & 0x01:
+#             total_prob += prob
+#     print(f'p(q{shift} = 1) = {total_prob}')
+
+probs = [abs(x) ** 2 for x in cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()]
 for shift in range(5):
-    total_prob = 0.0
+    prob_num = 0.0
+    prob_den = 0.0
     for i, prob in enumerate(probs):
+        prob_den += prob
         if (i >> ( 5 - 1 - shift)) & 0x01:
-            total_prob += prob
-    print(f'p(q{shift} = 1) = {total_prob}')
-
+            prob_num += prob
+    print(f'p(q{shift} = 1) = {prob_num / prob_den}')
 
 for shift in range(5):
     prob_num = 0.0
