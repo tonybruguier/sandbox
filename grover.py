@@ -1,5 +1,6 @@
 import cirq
 import cirq.contrib.bayesian_network as ccb
+from matplotlib import pyplot as plt
 import numpy as np
 
 def diffuser(qubits):
@@ -48,11 +49,32 @@ circuit += ccb.BayesianNetworkGate(
 print_state_vector(circuit)
 
 # Contrary to classical algorithms, adding extra iterations will worsen the results.
+x = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()
+
+
 for _ in range(1):
     circuit += oracle(qubits)
     print_state_vector(circuit)
+
     circuit += diffuser(qubits)
     print_state_vector(circuit)
+
+
+y = cirq.Simulator().simulate(circuit, qubit_order=qubits, initial_state=0).state_vector()
+
+idx_q3_0 = []
+idx_q3_1 = []
+for i in range(2 ** 5):
+    if (i >> ( 5 - 1 - 3)) & 0x01:
+        idx_q3_1.append(i)
+    else:
+        idx_q3_0.append(i)
+
+plt.plot(x[idx_q3_0], y[idx_q3_0], '.r')
+plt.plot(x[idx_q3_1], y[idx_q3_1], '.b')
+plt.grid()
+plt.legend(['q3=0', 'q3=1'])
+plt.savefig('grover.png')
 
 
 #print(cirq.unitary(cirq.Circuit(diffuser(qubits))))
