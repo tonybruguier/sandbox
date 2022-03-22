@@ -4,7 +4,6 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 def diffuser(qubits):
-    #yield cirq.X(qubits[0])
     for q in qubits:
         yield cirq.H(q)
         yield cirq.X(q)
